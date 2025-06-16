@@ -85,12 +85,15 @@ button:disabled {
 /* =========================
    BOTONES ESPECÍFICOS
 ========================= */
+#adminBtn {
+  padding: 11px 15px;
+}
 .admin-buttons {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  gap: 1em;
   width: 100%;
   align-content: center;
 }
@@ -148,9 +151,9 @@ button:disabled {
   background: #bbdefb;
   border-color: #1976d2;
 }
-/*.icono-modo {
-  font-size: 24px;
-}*/
+.icono-modo {
+  font-size: 16px;
+}
 .toggleDarkMode-Btn {
   background: #f0f0f0;
   color: #333;
@@ -239,51 +242,34 @@ button:disabled {
   background: #23272f;
   color: #ffe066;
 }
+.libro-novedades-btn, 
+.control-horario-btn {
+  position: fixed;
+  right: 20px;
+  z-index: 1001;
+  background: #ffe066;
+  color: #23272f;
+  font-size: 1em;
+  width: auto;
+  min-width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 26px;
+  box-shadow: 0 2px 6px #aaa;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
 .libro-novedades-btn {
-  position: fixed;
-  right: 20px;
-  z-index: 1001;
-  background: #ffe066;
-  color: #23272f;
-  font-size: 1em;
-  width: auto;
-  min-width: 52px;
   padding: 0 12px 0 12px;
-  height: 52px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-radius: 26px;
-  box-shadow: 0 2px 6px #aaa;
-  border: none;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
 }
-.libro-novedades-btn:hover {
-  background: #23272f;
-  color: #ffe066;
+.control-horario-btn {
+  padding: 0 0 0 0;
 }
-.control-horario {
-  position: fixed;
-  right: 20px;
-  z-index: 1001;
-  background: #ffe066;
-  color: #23272f;
-  font-size: 1em;
-  width: auto;
-  min-width: 52px;
-  padding: 0 0px 0 0px;
-  height: 52px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-radius: 26px;
-  box-shadow: 0 2px 6px #aaa;
-  border: none;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-}
-.control-horario:hover {
+.libro-novedades-btn:hover, 
+.control-horario-btn:hover {
   background: #23272f;
   color: #ffe066;
 }
@@ -385,6 +371,9 @@ tr:nth-child(even) {
 }
 #registrosTabla td {
   font-weight: normal;
+}
+#registrosTabla {
+  min-width: 434px;
 }
 
 /* Ancho fijo para las primeras 5 columnas de la tabla de registros */
@@ -551,24 +540,37 @@ body.dark-mode .modal-close:hover {
   flex-direction: row;
   justify-content: space-between;
   flex-wrap: wrap-reverse;
-  gap: 10px;
   align-items: center;
+  margin: auto;
+  width: 100%;
+  gap: 1em;
 }
 .header-selection {
   display: flex;
-  width: 40%;
-  min-width: 450px;
-  justify-content: space-between;
+  width: 100%;
+  max-width: 550px;
+  min-width: 434px;
+  justify-content: space-around;
   flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  gap: 1em;
 }
 .header-actions {
   display: flex;
-  width: 40%;
-  min-width: 450px;
+  width: 100%;
+  max-width: 550px;
+  min-width: 434px;
+  height: 100%;
   justify-content: space-between;
   flex-direction: column;
-  gap: 10px;
+  gap: 1em;
+}
+.main-actions {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  flex-direction: row;
+  gap : 1em;
 }
 #busquedaEmpleado[type="search"] {
   width: 100%;
@@ -653,13 +655,6 @@ body.dark-mode .modal-close:hover {
   margin-top: 0.1em;
   margin-bottom: 1em;
 }
-.main-actions {
-  display: flex;
-  align-items: center;
-  justify-content: end;
-  flex-direction: row;
-  gap : 10px;
-}
 .filters-container label, .filters-container input, .filters-container select {
   margin-bottom: 0;
 }
@@ -677,6 +672,8 @@ body.dark-mode .modal-close:hover {
 #fechaHoraActual {
   font-weight: bold;
   font-size: 1.5em;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 /* =========================
@@ -688,6 +685,7 @@ body.dark-mode .modal-close:hover {
   cursor: pointer;
   padding: 10px;
   width: 100%;
+  min-width: 434px;
   border: none;
   text-align: center;
   outline: none;
