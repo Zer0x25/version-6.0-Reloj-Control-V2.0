@@ -105,7 +105,10 @@
     </div>
   </div>  
   
-  <div><button type="button" class="collapsible-button">Filtros (Mostrar/Ocultar)</button>
+  <div>
+    <button type="button" class="collapsible-button">Tabla de Registros // Filtros<span class="icono-filtros">▼ (Mostrar/Ocultar)</span></button>
+    </button>
+  </div>
   </div>
 
 <div class="filters-content">
@@ -135,8 +138,7 @@
     <button onclick="exportarCSV()" id="exportarCSVBtn" aria-label="Exportar registros a CSV" title="Exportar registros a CSV">Exportar a CSV</button>
   </div>
 </div>
-<div  class="table-responsive mt-3">
-  <h3 class="mb-3">Registros</h3>
+<div  class="table-responsive">
   <table id="registrosTabla" class="table table-hover table-striped table-bordered align-middle">
       <colgroup>
         <col class="col-area">
