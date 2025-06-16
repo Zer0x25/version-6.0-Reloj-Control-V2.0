@@ -11,6 +11,7 @@ body {
   margin: 1em;
   background-color: #f4f7f6;
   color: #333;
+  min-width: 434px;
 }
 /*.main-container { /* Si tienes un contenedor principal */ 
 
@@ -24,6 +25,7 @@ h2 {
   margin-bottom: 1em;
   text-align: center;
   font-size: 1.9em;
+  min-width: 434px;
 }  
 h3, h4 {
   color: #2c3e50;
@@ -1016,4 +1018,13 @@ input#nuevaFechaHoraInput {
 }
 #tabla-proveedores col.col-motivo {
   width: auto;
+}
+
+@media (max-width: 600px) {
+  .table-responsive {
+    overflow-x: auto;
+  }
+  #registrosTabla {
+    min-width: 600px;
+  }
 }
