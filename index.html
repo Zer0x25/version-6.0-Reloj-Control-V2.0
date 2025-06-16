@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Horario</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    
+  <!-- Botón Libro de Novedades boton-flotante -->
+   
+    <button class="boton-flotante libro-novedades-btn" id="libroNovedadesBtn" aria-label="Libro de Novedades" title="Libro de Novedades">
+    <svg width="32px" height="32px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g id="book" clip-path="url(#clip-book)">
+    <g id="Group_2974" data-name="Group 2974" transform="translate(-364 -156)">
+      <g id="Group_2957" data-name="Group 2957">
+        <g id="Group_2956" data-name="Group 2956">
+          <g id="Group_2955" data-name="Group 2955">
+            <path id="Path_3956" data-name="Path 3956" d="M395.292,182.842H381.541a.5.5,0,0,1,0-1h13.251v-17.5h-2.146a.5.5,0,0,1,0-1h2.646a.5.5,0,0,1,.5.5v18.5A.5.5,0,0,1,395.292,182.842Z" fill="#344952"/>
+          </g>
+        </g>
+      </g>
+      <g id="Group_2960" data-name="Group 2960">
+        <g id="Group_2959" data-name="Group 2959">
+          <g id="Group_2958" data-name="Group 2958">
+            <path id="Path_3957" data-name="Path 3957" d="M378.375,182.842H364.708a.5.5,0,0,1-.5-.5v-18.5a.5.5,0,0,1,.5-.5h2.625a.5.5,0,0,1,0,1h-2.125v17.5h13.167a.5.5,0,0,1,0,1Z" fill="#344952"/>
+          </g>
+        </g>
+      </g>
+      <g id="Group_2967" data-name="Group 2967">
+        <g id="Group_2963" data-name="Group 2963">
+          <g id="Group_2962" data-name="Group 2962">
+            <g id="Group_2961" data-name="Group 2961">
+              <path id="Path_3958" data-name="Path 3958" d="M393.083,180.967a1,1,0,0,1-.323-.053c-9.285-3.172-12.009-.331-12.036-.3a1.009,1.009,0,0,1-.742.33h0a1,1,0,0,1-.743-.328c-.027-.03-2.754-2.87-12.038.3a1,1,0,0,1-1.323-.947v-18.25a1,1,0,0,1,.7-.952c.347-.11,8.267-2.594,13.409-.18,5.143-2.416,13.063.07,13.409.18a1,1,0,0,1,.7.952v18.25a1,1,0,0,1-1,1ZM374.877,177.4a9.073,9.073,0,0,1,5.1,1.253c1.429-.951,4.913-2.24,12.1-.058V162.472c-2.03-.541-8.025-1.875-11.62.111a1,1,0,0,1-.967,0c-3.6-1.986-9.591-.652-11.621-.111v16.122A24.346,24.346,0,0,1,374.877,177.4Z" fill="#344952"/>
+            </g>
+          </g>
+        </g>
+        <g id="Group_2966" data-name="Group 2966">
+          <g id="Group_2965" data-name="Group 2965">
+            <g id="Group_2964" data-name="Group 2964">
+              <path id="Path_3959" data-name="Path 3959" d="M380,180.967h-.042a1,1,0,0,1-.744-1.667,1.064,1.064,0,0,1,.77-.344,1.007,1.007,0,0,1,.76.344,1.018,1.018,0,0,1,.152,1.077A1,1,0,0,1,380,180.967Z" fill="#344952"/>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g id="Group_2970" data-name="Group 2970">
+        <g id="Group_2969" data-name="Group 2969">
+          <g id="Group_2968" data-name="Group 2968">
+            <path id="Path_3960" data-name="Path 3960" d="M379.979,180.444a.5.5,0,0,1-.5-.5V161.708a.5.5,0,0,1,1,0v18.236A.5.5,0,0,1,379.979,180.444Z" fill="#344952"/>
+          </g>
+        </g>
+      </g>
+      <g id="Group_2973" data-name="Group 2973">
+        <g id="Group_2972" data-name="Group 2972">
+          <g id="Group_2971" data-name="Group 2971">
+            <path id="Path_3961" data-name="Path 3961" d="M381.542,183.967h-3.167a.5.5,0,0,1-.5-.5c0-1.542.915-2.75,2.083-2.75s2.084,1.208,2.084,2.75A.5.5,0,0,1,381.542,183.967Zm-2.62-1h2.073c-.137-.714-.557-1.25-1.037-1.25S379.059,182.253,378.922,182.967Z" fill="#344952"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
+     </button>
+  <h2>Reloj Control - Espacio OX</h2>
+  
+  <div class="header-main">
+      <div class="header-selection">
+        <input type="search" id="busquedaEmpleado" list="listaBusqueda" placeholder="Buscar empleado por nombre..." aria-label="Buscar empleado" title="Buscar empleado" autocomplete="off" />
+        <datalist id="listaBusqueda"></datalist>
+        <div class="botones-centrados">
+          <button class="entrada-btn" id="entradaBtn" aria-label="Registrar entrada" title="Registrar entrada">
+            Entrada
+           </button>
+          <button class="salida-btn" id="salidaBtn" aria-label="Registrar salida" title="Registrar salida">
+            Salida
+           </button>
+        </div>
+      </div>     
+    <div class="header-actions">
+      <div class="head-fecha" id="fechaHoraActual"></div>  
+      <div class="main-actions">
+          <button class="admin-button" id="toggleDarkMode" aria-label="Modo oscuro/claro" title="Modo oscuro/claro">
+            <span class="icono-modo">🌙</span>
+          </button>
+          <button class="admin-button" id="adminBtn" aria-label="Administrar empleados" title="Administrar empleados">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="black" viewBox="0 0 32 32">
+              <path d="M31.7,20.9c-0.1-0.5-0.7-0.8-1.2-0.7c-0.7,0.2-1.2,0-1.3-0.2c-0.1-0.2,0-0.7,0.5-1.3c0.4-0.4,0.4-1,0-1.4
+                c-1-1-2.2-1.7-3.6-2.1c-0.5-0.1-1.1,0.2-1.2,0.7c-0.2,0.7-0.6,1-0.9,1s-0.6-0.4-0.9-1c-0.2-0.5-0.7-0.8-1.2-0.7
+                c-1.4,0.4-2.6,1.1-3.6,2.1c-0.4,0.4-0.4,1,0,1.4c0.5,0.5,0.6,1,0.5,1.3c-0.1,0.2-0.6,0.4-1.3,0.2c-0.5-0.1-1.1,0.2-1.2,0.7
+                C16.1,21.6,16,22.3,16,23s0.1,1.4,0.3,2.1c0.1,0.5,0.7,0.8,1.2,0.7c0.7-0.2,1.2,0,1.3,0.2c0.1,0.2,0,0.7-0.5,1.3
+                c-0.4,0.4-0.4,1,0,1.4c1,1,2.2,1.7,3.6,2.1c0.1,0,0.2,0,0.3,0c0.4,0,0.8-0.3,1-0.7c0.2-0.7,0.6-1,0.9-1s0.6,0.4,0.9,1
+                c0.2,0.5,0.7,0.8,1.2,0.7c1.4-0.4,2.6-1.1,3.6-2.1c0.4-0.4,0.4-1,0-1.4c-0.5-0.5-0.6-1-0.5-1.3c0.1-0.2,0.6-0.4,1.3-0.2
+                c0.5,0.1,1.1-0.2,1.2-0.7c0.2-0.7,0.3-1.4,0.3-2.1S31.9,21.6,31.7,20.9z M24,27c-2.2,0-4-1.8-4-4s1.8-4,4-4c2.2,0,4,1.8,4,4
+                S26.2,27,24,27z"/>
+              <path d="M14,23c0-1.2,0.2-2.3,0.6-3.3c0-0.1,0-0.1,0-0.2c0,0,0.1-0.1,0.1-0.1c0.5-1.2,1.1-2.2,1.9-3.1c0.1-0.4,0.2-0.7,0.3-1.1
+                c0-0.3,0-0.6-0.2-0.8S16.2,14,15.9,14c-1.1,0-2.1-0.4-2.9-1h6c0.6,0,1-0.4,1-1s-0.4-1-1-1h-0.2v-0.2c0-1.8-0.6-3.4-1.6-4.8l-0.7,2.5
+                c-0.1,0.4-0.5,0.7-1,0.7c-0.1,0-0.2,0-0.3,0c-0.5-0.2-0.8-0.7-0.7-1.2l1.2-4.1c0-0.3-0.2-0.6-0.5-0.8c-2.6-1.3-5.7-1.3-8.3,0
+                C6.5,3.1,6.4,3.5,6.3,3.8l1.2,4.1c0.2,0.5-0.2,1.1-0.7,1.2c-0.1,0-0.2,0-0.3,0c-0.4,0-0.8-0.3-1-0.7L4.9,6c-1,1.4-1.6,3-1.6,4.8V11
+                H3c-0.6,0-1,0.4-1,1s0.4,1,1,1h2v1c0,2.2,0.9,4.2,2.4,5.5c-0.2,1.4-1.1,2.6-2.5,3c-2.5,0.7-4.4,2.9-5,5.7c-0.1,0.5,0,0.9,0.3,1.3
+                C0.6,29.8,1,30,1.5,30h15.4C15.1,28.2,14,25.7,14,23z"/>
+            </svg>
+          </button>
+      </div>
+    </div>
+  </div>  
+  <h3><button type="button" class="collapsible-button">Filtros (Mostrar/Ocultar)</button></h3>
+
+<div class="filters-content">
+  <div class="filters-grid">
+    <div>
+      <label for="filtroNombre">Nombre:</label>
+      <input type="text" id="filtroNombre" oninput="mostrarRegistros()">
+    </div>
+    <div>
+      <label for="filtroDepartamento">Departamento:</label>
+      <select id="filtroDepartamento" onchange="mostrarRegistros()">
+        <option value="">Todos</option>
+      </select>
+    </div>
+    <div>
+      <label for="filtroDesde">Desde:</label>
+      <input type="date" id="filtroDesde" onchange="mostrarRegistros()">
+    </div>
+    <div>
+      <label for="filtroHasta">Hasta:</label>
+      <input type="date" id="filtroHasta" onchange="mostrarRegistros()">
+    </div>
+  </div>
+  <!-- Ejemplo para botones de filtros y exportación -->
+  <div class="filter-actions">
+    <button onclick="limpiarFiltros()" id="limpiarFiltrosBtn" aria-label="Limpiar filtros" title="Limpiar filtros">Limpiar Filtros</button>
+    <button onclick="exportarCSV()" id="exportarCSVBtn" aria-label="Exportar registros a CSV" title="Exportar registros a CSV">Exportar a CSV</button>
+  </div>
+</div>
+
+  <h3>Registros</h3>
+  <table id="registrosTabla">
+    <thead>
+      <tr>
+        <th>Departamento</th>
+        <th>Nombre</th>
+        <th>Cargo</th>
+        <th>Entrada</th>
+        <th>Salida</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div id="adminPanel" class="admin-panel">
+    <div class="admin-header">
+      <h3>Administrar Empleados</h3>
+      <button class="close-button" onclick="toggleAdmin()">×</button>
+    </div>
+
+    <div class="admin-form-grid">
+      <div class="form-group">
+        <label for="adminId">ID:</label>
+        <input type="text" id="adminId" readonly>
+      </div>
+      <div class="form-group">
+        <label for="adminNombre">Nombre:</label>
+        <input type="text" id="adminNombre">
+      </div>
+      <div class="form-group">
+        <label for="adminCargo">Cargo:</label>
+        <input type="text" id="adminCargo">
+      </div>
+      <div class="form-group">
+        <label for="adminDepto">Departamento:</label>
+        <input type="text" id="adminDepto">
+      </div>
+    </div>
+
+    <div class="admin-buttons">
+      <button class="admin-buttons2" onclick="nuevoEmpleado()" aria-label="Nuevo empleado" title="Nuevo empleado">Crear Nuevo</button>
+      <button class="admin-buttons2" onclick="guardarEmpleado()" aria-label="Guardar o actualizar empleado" title="Guardar o actualizar empleado">Guardar/Actualizar</button>
+      <button class="admin-buttons2" onclick="eliminarEmpleado()" aria-label="Eliminar empleado" title="Eliminar empleado">Eliminar</button>
+      <button class="cancel-button" onclick="toggleAdmin()" aria-label="Cancelar y cerrar panel" title="Cancelar y cerrar panel">Cancelar</button>
+    </div>
+
+    <h4>Lista actual de empleados:</h4>
+    <ul id="listaEmpleados"></ul>
+
+    <h4>Logs de Auditoría:</h4>
+    <div class="log-actions">
+      <button onclick="verLogs()" aria-label="Ver logs de auditoría" title="Ver logs de auditoría">Ver Logs</button>
+      <button onclick="limpiarLogs()" aria-label="Limpiar logs de auditoría" title="Limpiar logs de auditoría" class="oculto">Limpiar Logs</button>
+    </div>
+    <div id="logsViewer"></div>
+  </div>
+  
+  <div id="editarRegistroModal">
+  <div class="modal-content">
+    <h3 id="modalTituloEdicion"></h3>
+    <div id="campoFechaHoraWrapper">
+      <label for="nuevaFechaHoraInput">Nueva Fecha y Hora:</label>
+      <input type="datetime-local" id="nuevaFechaHoraInput" oninput="habilitarAceptarEdicion()">
+    </div>
+    <div class="modal-buttons">
+      <button id="btnAceptarEdicion" onclick="aceptarEdicion()" aria-label="Aceptar edición" title="Aceptar edición">Aceptar</button>
+      <button onclick="cancelarEdicion()" aria-label="Cancelar edición" title="Cancelar edición">Cancelar</button>
+    </div>
+  </div>
+</div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="utils.js"></script>
+  <script src="app.js"></script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    
+    // Inicializar dark mode si está habilitado
+    if (localStorage.getItem('darkMode') === 'true') {
+    document.body.classList.add('dark-mode');
+  }
+    // Botón Libro de Novedades
+    const libroBtn = document.getElementById('libroNovedadesBtn');
+    if (libroBtn) {
+      libroBtn.addEventListener('click', function() {
+        window.location.href = 'libro-novedades.html';
+      });
+    }
+
+    // Botón Modo Oscuro
+    const darkBtn = document.getElementById('toggleDarkMode');
+    if (darkBtn) {
+      darkBtn.addEventListener('click', toggleDarkMode);
+    }
+
+    // Botón Administrador
+    const adminBtn = document.getElementById('adminBtn');
+    if (adminBtn) {
+      adminBtn.addEventListener('click', toggleAdmin);
+    }
+
+    // Botón Entrada
+    const entradaBtn = document.getElementById('entradaBtn');
+    if (entradaBtn) {
+      entradaBtn.addEventListener('click', function() {
+        registrar('entrada');
+      });
+    }
+
+    // Botón Salida
+    const salidaBtn = document.getElementById('salidaBtn');
+    if (salidaBtn) {
+      salidaBtn.addEventListener('click', function() {
+        registrar('salida');
+      });
+    }
+
+    // Botón Limpiar Búsqueda
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    if (clearSearchBtn) {
+      clearSearchBtn.addEventListener('click', limpiarBusquedaEmpleado);
+    }
+
+    // Botón Limpiar Filtros
+    const limpiarFiltrosBtn = document.getElementById('limpiarFiltrosBtn');
+    if (limpiarFiltrosBtn) {
+      limpiarFiltrosBtn.addEventListener('click', limpiarFiltros);
+    }
+
+    // Botón Exportar CSV
+    const exportarCSVBtn = document.getElementById('exportarCSVBtn');
+    if (exportarCSVBtn) {
+      exportarCSVBtn.addEventListener('click', exportarCSV);
+    }
+  });
+
+  document.getElementById('busquedaEmpleado').addEventListener('search', function (e) {
+    if (this.value === '') {
+      limpiarBusquedaEmpleado();
+    }
+  });
+</script>
+
+</body>
+</html>
