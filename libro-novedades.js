@@ -527,7 +527,6 @@ document.addEventListener("DOMContentLoaded", function() {
   // ...existing code...
   const abrirRegistroBtn = document.getElementById('abrirRegistroBtn');
   if (abrirRegistroBtn) {
-    abrirRegistroBtn.removeEventListener('click', abrirModal); // por si acaso
     abrirRegistroBtn.addEventListener('click', abrirModalRegistroSweet);
   }
   const abrirProveedorBtn = document.getElementById('abrirProveedorBtn');

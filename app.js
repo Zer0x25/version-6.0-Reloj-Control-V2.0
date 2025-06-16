@@ -675,8 +675,8 @@ function mostrarRegistros() {
 
 function aplicarEventosDblClickATabla() {
   document.querySelectorAll("#registrosTabla tbody tr").forEach(tr => {
-    const tdEntrada = tr.children[4]; // Columna de EntradaCompleta (índice 4)
-    const tdSalida = tr.children[5];  // Columna de SalidaCompleta (índice 5)
+    const tdEntrada = tr.children[3]; // Columna de EntradaCompleta (índice 3)
+    const tdSalida = tr.children[4];  // Columna de SalidaCompleta (índice 4)
 
     // Clonar y reemplazar para eliminar listeners viejos eficazmente
     const newTdEntrada = tdEntrada.cloneNode(true);

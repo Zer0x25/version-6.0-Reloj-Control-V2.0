@@ -196,7 +196,7 @@
   <div class="modal-content">
     <h3 id="modalTituloEdicion"></h3>
     <div id="campoFechaHoraWrapper">
-      <label for="nuevaFechaHoraInput">Nueva Fecha y Hora:</label>
+      <label for="nuevaFechaHoraInput" class="label-entradaSalida">Nueva Fecha y Hora:</label>
       <input type="datetime-local" id="nuevaFechaHoraInput" oninput="habilitarAceptarEdicion()">
     </div>
     <div class="modal-buttons">
@@ -211,6 +211,7 @@
   <script src="app.js"></script>
 
   <script>
+    
   document.addEventListener('DOMContentLoaded', function() {
     
     // Inicializar dark mode si está habilitado
@@ -279,5 +280,52 @@
   });
 </script>
 
+<!-- Botón Volver 
+<input type="file" id="fileInput" accept=".json" />
+<button onclick="importarConReset()">Importar y Reemplazar localStorage</button>
+
+<script>
+function importarConReset() {
+  const input = document.getElementById("fileInput");
+
+  if (!input.files.length) {
+    alert("Primero selecciona un archivo JSON.");
+    return;
+  }
+
+  const confirmacion = confirm("⚠️ Esto borrará todo el localStorage actual. ¿Estás seguro?");
+  if (!confirmacion) {
+    alert("Operación cancelada.");
+    return;
+  }
+
+  const file = input.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function(event) {
+    try {
+      const data = JSON.parse(event.target.result);
+
+      // 1. Borrar localStorage actual
+      localStorage.clear();
+
+      // 2. Importar nuevo contenido
+      let count = 0;
+      for (const key in data) {
+        localStorage.setItem(key, data[key]);
+        count++;
+      }
+
+      alert(`✅ Importación completa. Se cargaron ${count} claves nuevas.`);
+    } catch (err) {
+      alert("❌ Error al importar: archivo no válido o corrupto.");
+      console.error(err);
+    }
+  };
+
+  reader.readAsText(file);
+}
+</script>
+-->
 </body>
 </html>
