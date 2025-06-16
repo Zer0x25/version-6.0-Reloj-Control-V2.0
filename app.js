@@ -86,13 +86,13 @@ function exportarCSV() {
   const registros = obtenerDeLS(LS_REGISTROS) || [];
 
   const nombreFiltro = document.getElementById("filtroNombre").value.toLowerCase();
-  const deptoFiltro = document.getElementById("filtroDepartamento").value;
+  const areaFiltro = document.getElementById("filtroArea").value;
   const desde = document.getElementById("filtroDesde").value;
   const hasta = document.getElementById("filtroHasta").value;
 
   const filtrados = registros.filter(reg => {
     return (!nombreFiltro || reg.nombre.toLowerCase().includes(nombreFiltro))
-      && (!deptoFiltro || reg.departamento === deptoFiltro)
+      && (!areaFiltro || reg.area === areaFiltro)
       && (!desde || reg.entradaCompleta >= `${desde} 00:00`)
       && (!hasta || reg.entradaCompleta <= `${hasta} 23:59`);
   });
@@ -107,7 +107,7 @@ function exportarCSV() {
     return;
   }
 
-  const encabezados = ["ID", "Departamento", "Nombre", "Cargo", "Entrada", "Salida", "Horas Trabajadas"];
+  const encabezados = ["ID", "Area", "Nombre", "Cargo", "Entrada", "Salida", "Horas Trabajadas"];
   const filas = filtrados.map(r => {
     let horas = "";
     if (r.entradaCompleta && r.salidaCompleta) {
@@ -117,7 +117,7 @@ function exportarCSV() {
     }
     return [
       r.id,
-      r.departamento,
+      r.area,
       r.nombre,
       r.cargo || "",
       r.entradaCompleta || "",
@@ -160,7 +160,7 @@ function actualizarFechaHora() {
 
 function limpiarFiltros() {
   document.getElementById("filtroNombre").value = "";
-  document.getElementById("filtroDepartamento").value = "";
+  document.getElementById("filtroArea").value = "";
   document.getElementById("filtroDesde").value = "";
   document.getElementById("filtroHasta").value = "";
   mostrarRegistros();
@@ -182,12 +182,12 @@ function cargarEmpleados() {
   lista.innerHTML = "";
   empleados.forEach(emp => {
     const li = document.createElement("li");
-    li.textContent = `${emp.id} - ${emp.nombre} (${emp.cargo || 'Sin Cargo'}, ${emp.departamento})`; // Mostrar cargo
+    li.textContent = `${emp.id} - ${emp.nombre} (${emp.cargo || 'Sin Cargo'}, ${emp.area})`; // Mostrar cargo
     li.onclick = () => {
       document.getElementById("adminId").value = emp.id;
       document.getElementById("adminNombre").value = emp.nombre;
       document.getElementById("adminCargo").value = emp.cargo || ''; // Rellenar campo de cargo
-      document.getElementById("adminDepto").value = emp.departamento;
+      document.getElementById("adminArea").value = emp.area;
       document.querySelectorAll("#listaEmpleados li").forEach(l => l.classList.remove("selected"));
       li.classList.add("selected");
       empleadoSeleccionado = emp.id;
@@ -195,14 +195,11 @@ function cargarEmpleados() {
     lista.appendChild(li);
   });
 
-  const selectDepto = document.getElementById("filtroDepartamento");
-  const departamentos = [...new Set(empleados.map(e => e.departamento))];
-  selectDepto.innerHTML = '<option value="">Todos</option>';
-  departamentos.sort().forEach(dep => {
-    const opt = document.createElement("option");
-    opt.value = dep;
-    opt.textContent = dep;
-    selectDepto.appendChild(opt);
+  const selectArea = document.getElementById("filtroArea");
+  const areas = [...new Set(empleados.map(e => e.area))];
+  selectArea.innerHTML = '<option value="">Todos</option>';
+  areas.sort().forEach(area => {
+    if (area) selectArea.innerHTML += `<option value="${area}">${area}</option>`;
   });
 
   // Rellena la datalist para la búsqueda principal
@@ -218,8 +215,8 @@ function cargarEmpleados() {
 function limpiarFormularioEmpleado() {
   document.getElementById("adminId").value = "";
   document.getElementById("adminNombre").value = "";
-  document.getElementById("adminCargo").value = ""; // Limpiar campo de cargo
-  document.getElementById("adminDepto").value = "";
+  document.getElementById("adminCargo").value = "";
+  document.getElementById("adminArea").value = "";
   empleadoSeleccionado = null;
   document.querySelectorAll("#listaEmpleados li").forEach(li => li.classList.remove("selected"));
 }
@@ -228,12 +225,12 @@ async function guardarEmpleado() {
   const id = document.getElementById("adminId").value.trim();
   const nombre = document.getElementById("adminNombre").value.trim();
   const cargo = document.getElementById("adminCargo").value.trim();
-  const departamento = document.getElementById("adminDepto").value.trim();
-  if (!id || !nombre || !cargo || !departamento) {
+  const area = document.getElementById("adminArea").value.trim();
+  if (!id || !nombre || !cargo || !area) {
     Swal.fire({
       icon: 'warning',
       title: 'Campos Requeridos',
-      text: 'Todos los campos (ID, Nombre, Cargo, Departamento) son requeridos.',
+      text: 'Todos los campos (ID, Nombre, Cargo, Area) son requeridos.',
       confirmButtonText: 'Entendido'
     });
     return;
@@ -249,7 +246,7 @@ async function guardarEmpleado() {
     // Si existe, actualiza
     existente.nombre = nombre;
     existente.cargo = cargo;
-    existente.departamento = departamento;
+    existente.area = area;
     mensajeLog = "Empleado actualizado";
     accionSwal = "actualizado";
   } else {
@@ -263,7 +260,7 @@ async function guardarEmpleado() {
       });
       return;
     }
-    empleados.push({ id, nombre, cargo, departamento });
+    empleados.push({ id, nombre, cargo, area });
     mensajeLog = "Empleado creado";
     accionSwal = "creado";
   }
@@ -385,7 +382,7 @@ async function registrar(tipo) {
     return;
   }
 
-  const { id, nombre, cargo, departamento } = empleadoActual;
+  const { id, nombre, cargo, area } = empleadoActual;
   const fecha = obtenerFechaHoy();
   const hora = obtenerHoraActual();
   const fechaHoraCompleta = `${fecha} ${hora}`;
@@ -437,7 +434,7 @@ async function registrar(tipo) {
       id,
       nombre,
       cargo,
-      departamento,
+      area,
       entradaCompleta: fechaHoraCompleta,
       salidaCompleta: "",
       comentario: "" // Asegura que todos los registros nuevos tengan campo comentario
@@ -525,9 +522,9 @@ function registrarSalidaDesdeTabla(idEmpleado) {
 
 // --- Lógica de Registros y Filtrado ---
 
-function esRegistroVisible(reg, nombreFiltro, deptoFiltro, desde, hasta) {
+function esRegistroVisible(reg, nombreFiltro, areaFiltro, desde, hasta) {
   if (nombreFiltro && !reg.nombre.toLowerCase().includes(nombreFiltro)) return false;
-  if (deptoFiltro && reg.departamento !== deptoFiltro) return false;
+  if (areaFiltro && reg.area !== areaFiltro) return false;
 
   if (desde && (!reg.entradaCompleta || reg.entradaCompleta < `${desde} 00:00`)) return false;
   if (hasta && (!reg.entradaCompleta || reg.entradaCompleta > `${hasta} 23:59`)) return false;
@@ -541,12 +538,12 @@ function mostrarRegistros() {
   const registros = obtenerDeLS(LS_REGISTROS) || [];
 
   let nombreFiltro = document.getElementById("filtroNombre").value.toLowerCase();
-  let deptoFiltro = document.getElementById("filtroDepartamento").value;
+  let areaFiltro = document.getElementById("filtroArea").value;
   let desde = document.getElementById("filtroDesde").value;
   let hasta = document.getElementById("filtroHasta").value;
 
   // Si todos los filtros están vacíos, aplica filtro predeterminado: registros de las últimas 18 horas
-  if (!nombreFiltro && !deptoFiltro && !desde && !hasta) {
+  if (!nombreFiltro && !areaFiltro && !desde && !hasta) {
     const ahora = new Date();
     const hace18Horas = new Date(ahora.getTime() - 18 * 60 * 60 * 1000);
 
@@ -571,7 +568,7 @@ function mostrarRegistros() {
 
       tabla.innerHTML += `
         <tr data-uid="${reg.uid}">
-          <td>${reg.departamento}</td>
+          <td>${reg.area}</td>
           <td>${reg.nombre}</td>
           <td>${reg.cargo || '-'}</td>
           <td>${reg.entradaCompleta || '-'}</td>
@@ -614,7 +611,7 @@ function mostrarRegistros() {
   // Filtro normal si hay algún filtro activo
   let filtrados = registros.filter(reg => {
     return (!nombreFiltro || reg.nombre.toLowerCase().includes(nombreFiltro))
-      && (!deptoFiltro || reg.departamento === deptoFiltro)
+      && (!areaFiltro || reg.area === areaFiltro)
       && (!desde || reg.entradaCompleta >= `${desde} 00:00`)
       && (!hasta || reg.entradaCompleta <= `${hasta} 23:59`);
   });
@@ -635,7 +632,7 @@ function mostrarRegistros() {
 
     tabla.innerHTML += `
       <tr data-uid="${reg.uid}">
-        <td>${reg.departamento}</td>
+        <td>${reg.area}</td>
         <td>${reg.nombre}</td>
         <td>${reg.cargo || '-'}</td>
         <td>${reg.entradaCompleta || '-'}</td>

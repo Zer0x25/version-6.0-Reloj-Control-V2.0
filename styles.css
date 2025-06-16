@@ -27,7 +27,6 @@ h2 {
 }  
 h3, h4 {
   color: #2c3e50;
-  border-bottom: 1px solid #eee;
   margin: 0 0 0 0;
 }
 label {
@@ -73,8 +72,6 @@ button {
   border-radius: 4px;
   cursor: pointer;
   font-size: 1em;
-  margin-right: 0.5em;
-  margin-bottom: 0.5em;
   transition: background-color 0.2s ease;
 }
 button:hover {
@@ -390,6 +387,28 @@ tr:nth-child(even) {
   font-weight: normal;
 }
 
+/* Ancho fijo para las primeras 5 columnas de la tabla de registros */
+#registrosTabla col.col-area {
+  width: 130px; min-width: 100px; max-width: 160px;
+}
+#registrosTabla col.col-empleado {
+  width: auto; min-width: 150px; max-width: 200px;
+}
+#registrosTabla col.col-cargo {
+  width: 180px; min-width: 100px; max-width: 180px;
+}
+#registrosTabla col.col-entrada {
+  width: 180px; min-width: 140px; max-width: 180px;
+  cursor: pointer;
+}
+#registrosTabla col.col-salida {
+  width: 200px; min-width: 140px; max-width: 200px;
+}
+#registrosTabla col.col-acciones {
+  width: 100px; min-width: 80px; max-width: 110px;
+}
+/* La última columna (Acciones) es autoajustable */
+
 /* =========================
    ESTADOS DE REGISTRO
 ========================= */
@@ -676,8 +695,8 @@ body.dark-mode .modal-close:hover {
   display: block;
   border-radius: 4px;
   margin-top: 0.5em;
-  margin-bottom: 0.5em;
   transition: background-color 0.2s ease;
+  font-size: 1.5em;
 }
 .collapsible-button:hover {
   background-color: #e0e0e0;
@@ -974,4 +993,28 @@ body.dark-mode .cabecera-turno strong {
 }
 input#nuevaFechaHoraInput {
     font-size: 1.5em;
+}
+#tabla-guardados col.col-hora {
+  width: 100px; min-width: 80px; max-width: 160px;
+}
+#tabla-guardados col.col-anotacion {
+  width: auto;
+}
+#tabla-proveedores col.col-hora {
+  width: 100px; min-width: 80px; max-width: 160px;
+}
+#tabla-proveedores col.col-patente {
+  width: 100px; min-width: 80px; max-width: 160px;
+}
+#tabla-proveedores col.col-conductor {
+  width: 160px; min-width: 120px; max-width: 200px;
+}
+#tabla-proveedores col.col-acompanantes {
+  width: 50px; min-width: 40px; max-width: 60px;
+}
+#tabla-proveedores col.col-empresa {
+  width: 160px; min-width: 120px; max-width: 200px;
+}
+#tabla-proveedores col.col-motivo {
+  width: auto;
 }
