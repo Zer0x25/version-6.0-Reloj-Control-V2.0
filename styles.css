@@ -11,7 +11,7 @@ body {
   margin: 1em;
   background-color: #f4f7f6;
   color: #333;
-  min-width: 434px;
+  min-width: 328px;
 }
 /*.main-container { /* Si tienes un contenedor principal */ 
 
@@ -24,14 +24,13 @@ h2 {
   margin-top: 1em;
   margin-bottom: 1em;
   text-align: center;
-  font-size: 1.9em;
-  min-width: 434px;
+  font-size: 1.9em; 
 }  
 h3, h4 {
   color: #2c3e50;
   margin: 0 0 0 0;
 }
-label {
+label { 
   display: block;
   margin: 0.3em 0 0.3em;
   font-weight: bold;
@@ -546,7 +545,6 @@ body.dark-mode .modal-close:hover {
   display: flex;
   width: 100%;
   max-width: 550px;
-  min-width: 434px;
   justify-content: space-around;
   flex-direction: column;
   align-items: center;
@@ -556,7 +554,6 @@ body.dark-mode .modal-close:hover {
   display: flex;
   width: 100%;
   max-width: 550px;
-  min-width: 434px;
   height: 100%;
   justify-content: space-between;
   flex-direction: column;
@@ -682,7 +679,6 @@ body.dark-mode .modal-close:hover {
   cursor: pointer;
   padding: 10px;
   width: 100%;
-  min-width: 434px;
   border: none;
   text-align: center;
   outline: none;
