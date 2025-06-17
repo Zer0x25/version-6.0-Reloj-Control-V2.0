@@ -811,9 +811,9 @@ function toggleDarkMode() {
   // Cambia el icono del botón según el modo
   const btn = document.getElementById('toggleDarkMode');
   if (document.body.classList.contains('dark-mode')) {
-    btn.textContent = '☀️';
+    btn.innerHTML = '<span class="icono-modo">☀️</span>';
   } else {
-    btn.textContent = '🌙';
+    btn.innerHTML = '<span class="icono-modo">🌙</span>';
   }
 }
 
