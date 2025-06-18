@@ -99,45 +99,75 @@ select:disabled {
   flex-direction: column;
   gap: 1.2em;
   text-align: left;
+  padding: 0.8em;
+  border-width: 2px;
+  border-style: groove;
+  border-color: threedface;
+  border-image: initial;
+  font-size: 0.6em;
 }
-
-.fila {
+#swal2-html-container {
+  padding: 0.5em;
+}
+#swal2-title {
+  padding: 0.3em;
+  font-size: clamp(20px, 2vw, 35px);
+}
+.swal2-actions {
+  margin: 0;
+}
+.primera-fila {
   display: flex;
   align-items: center;
   gap: 0.5em;
+  font-size: clamp(12px, 1.9vw, 20px);
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
 }
-
+.fila, .fila2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: clamp(12px, 1.9vw, 20px);
+}
 .fila label {
-  width: 30%;
+  width: 20%;
+  min-width: 63px;  /* No baja de esto */
   font-weight: bold;
 }
-
+.hora1 {
+  min-width: 31px;     /* No baja de esto */
+  flex: 0 1 150px;      /* flex-grow: 0, flex-shrink: 1, flex-basis: 150px */
+}
+.patente1 {
+  min-width: 47px;       /* No baja de esto */
+  flex: 0 1 25%;      /* flex-grow: 0, flex-shrink: 1, flex-basis: 150px */
+}
 .campo-input {
   flex: 1;
   margin: 0;
 }
-
 .campo-textarea {
-  flex: 1;
+  max-height: 120px;
   min-height: 60px;
+  overflow-y: auto;
+  flex: 1;
   margin: 0;
 }
-
+.campo-acompanantes,
 .campo-hora {
-      flex: 0;
-    }
-
-.campo-acompanantes {
-      flex: 0;
-    }
+  flex: 0;
+}
 
 .swal2-popup {
-      box-sizing: border-box;
-      max-height: 98vw;
-      max-width: 98vw;
-      overflow-y: auto;
-      overflow-x: auto;
-    }
+  box-sizing: border-box;
+  max-height: 98vw;
+  max-width: 98vw;
+  overflow-y: auto;
+  overflow-x: auto;
+}
 
 /* =========================
    BOTONES GENERALES
@@ -651,6 +681,7 @@ input#nuevaFechaHoraInput {
   position: relative;
   animation: modalFadeIn 0.3s;
   overflow-y: auto;
+  width: auto;
 }
 .label-entradaSalida {
   font-size: 1em;

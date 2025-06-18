@@ -451,7 +451,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 const formularioHTML = `
       <fieldset class="formulario-alerta">
-        <legend>Datos de registro</legend>
 
         <div class="fila">
           <label for="swal-input-hora">Hora:</label>
@@ -508,25 +507,23 @@ async function abrirModalRegistroSweet() {
 
 const proveedorHTML = `
         <fieldset class="formulario-alerta">
-          <legend>Registro de Proveedor</legend>
-
-          <div class="fila">
-            <label for="swal-prov-hora">Hora:</label>
+          <section class="primera-fila">
+          <div class="fila2">
+            <label class="hora1" for="swal-prov-hora">Hora:</label>
             <input type="time" id="swal-prov-hora" class="swal2-input campo-input campo-hora">
           </div>
-
-          <div class="fila">
-            <label for="swal-prov-patente">Patente:</label>
-            <input type="text" id="swal-prov-patente" class="swal2-input campo-input" placeholder="XX-XX-XX">
+          <div class="fila2">
+            <label class="patente1" for="swal-prov-patente">Patente:</label>
+            <input type="text" id="swal-prov-patente" class="swal2-input campo-input campo-patente" placeholder="XX-XX-XX">
           </div>
-
+          </section>
           <div class="fila">
             <label for="swal-prov-conductor">Conductor:</label>
             <input type="text" id="swal-prov-conductor" class="swal2-input campo-input" placeholder="Nombre del conductor">
           </div>
 
           <div class="fila">
-            <label for="swal-prov-acompanantes">Acompañantes:</label>
+            <label for="swal-prov-acompanantes">Pax:</label>
             <input type="number" min="0" max="9" id="swal-prov-acompanantes" class="swal2-input campo-input campo-acompanantes" value="0">
           </div>
 
@@ -624,6 +621,18 @@ document.addEventListener("DOMContentLoaded", function() {
   if (abrirProveedorBtn) {
     abrirProveedorBtn.addEventListener('click', abrirModalProveedorSweet);
   }
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const textareas = document.querySelectorAll('.campo-textarea');
+
+  textareas.forEach(textarea => {
+    textarea.addEventListener('input', function () {
+      this.style.height = 'auto'; // Reinicia altura si borras texto
+      const altura = Math.min(this.scrollHeight, 120); // Máximo 120px
+      this.style.height = altura + 'px';
+    });
+  });
 });
 
 // --- SCROLL AUTOMÁTICO Y CIERRE POR FONDO EN MODALES ---
