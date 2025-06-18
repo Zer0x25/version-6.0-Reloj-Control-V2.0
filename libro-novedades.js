@@ -11,7 +11,12 @@ try {
 
 function sweetAlertError(msg) {
   if (window.Swal) {
-    Swal.fire({icon:'warning', title:'Atención', text:msg, confirmButtonText:'OK'});
+    Swal.fire({
+      icon:'warning',
+      title:'Atención',
+      text:msg,
+      confirmButtonText:'OK'
+    });
   } else {
     alert(msg);
   }
@@ -26,7 +31,6 @@ function guardarRegistroDesdeModal() {
   let registros = obtenerDeLS(LS_NOVEDADES) || [];
   registros.push({ hora, nota });
   guardarEnLS(LS_NOVEDADES, registros);
-
   agregarRegistroATabla(hora, nota);
   cerrarModal();
 }
@@ -191,6 +195,7 @@ function bloquearCabeceraTurno() {
 }
 
 // Al reportar turno, guardar todo y limpiar estado de turno abierto
+
 const oldReportarTurno = typeof reportarTurno === 'function' ? reportarTurno : null;
 function reportarTurno() {
   const turnoAbierto = obtenerDeLS(LS_TURNO_ABIERTO);
@@ -267,6 +272,7 @@ function mostrarNotificacionTurnoCerrado(mensaje, callback) {
 }
 
 // --- UTILIDADES GENERICAS PARA MODALES Y TABLAS ---
+
 function cerrarYLimpiarModal(modalId, campos) {
   document.getElementById(modalId).style.display = "none";
   campos.forEach(id => {
@@ -443,6 +449,22 @@ document.addEventListener('DOMContentLoaded', function() {
   forzarRedireccionCerrarModalInicioTurno();
 });
 
+const formularioHTML = `
+      <fieldset class="formulario-alerta">
+        <legend>Datos de registro</legend>
+
+        <div class="fila">
+          <label for="swal-input-hora">Hora:</label>
+          <input type="time" id="swal-input-hora" class="swal2-input campo-input campo-hora">
+        </div>
+
+        <div class="fila">
+          <label for="swal-input-nota">Anotación:</label>
+          <textarea id="swal-input-nota" class="swal2-textarea campo-textarea campo-nota" placeholder="Anotación..."></textarea>
+        </div>
+      </fieldset>
+    `;
+
 async function abrirModalRegistroSweet() {
   if (!turnoEstaAbierto()) {
     window.location.href = 'index.html';
@@ -450,13 +472,21 @@ async function abrirModalRegistroSweet() {
   }
   const { value: formValues } = await Swal.fire({
     title: 'Nuevo Registro',
-    html:
-      `<label>Hora:</label><br><input type="time" id="swal-input-hora" class="swal2-input" style="width:70%"><br>` +
-      `<label>Anotación:</label><br><textarea id="swal-input-nota" class="swal2-textarea" placeholder="Anotación..." style="width:90%"></textarea>`,
+    html: formularioHTML,
+      customClass: {
+      popup: 'custom-popup'
+      },
+    width: '600px',
     focusConfirm: false,
     showCancelButton: true,
     confirmButtonText: 'Guardar',
     cancelButtonText: 'Cancelar',
+    didOpen: () => {
+          const ahora = new Date();
+          const horaActual = ahora.toTimeString().substring(0,5); // HH:MM
+          const inputHora = document.getElementById('swal-input-hora');
+          inputHora.value = horaActual;
+        },
     preConfirm: () => {
       const hora = document.getElementById('swal-input-hora').value;
       const nota = document.getElementById('swal-input-nota').value;
@@ -476,6 +506,42 @@ async function abrirModalRegistroSweet() {
   }
 }
 
+const proveedorHTML = `
+        <fieldset class="formulario-alerta">
+          <legend>Registro de Proveedor</legend>
+
+          <div class="fila">
+            <label for="swal-prov-hora">Hora:</label>
+            <input type="time" id="swal-prov-hora" class="swal2-input campo-input campo-hora">
+          </div>
+
+          <div class="fila">
+            <label for="swal-prov-patente">Patente:</label>
+            <input type="text" id="swal-prov-patente" class="swal2-input campo-input" placeholder="XX-XX-XX">
+          </div>
+
+          <div class="fila">
+            <label for="swal-prov-conductor">Conductor:</label>
+            <input type="text" id="swal-prov-conductor" class="swal2-input campo-input" placeholder="Nombre del conductor">
+          </div>
+
+          <div class="fila">
+            <label for="swal-prov-acompanantes">Acompañantes:</label>
+            <input type="number" min="0" max="9" id="swal-prov-acompanantes" class="swal2-input campo-input campo-acompanantes" value="0">
+          </div>
+
+          <div class="fila">
+            <label for="swal-prov-empresa">Empresa:</label>
+            <input type="text" id="swal-prov-empresa" class="swal2-input campo-input" placeholder="Nombre de la Empresa">
+          </div>
+
+          <div class="fila">
+            <label for="swal-prov-motivo">Motivo:</label>
+            <textarea id="swal-prov-motivo" class="swal2-textarea campo-textarea" placeholder="Motivo del proveedor..."></textarea>
+          </div>
+        </fieldset>
+      `;
+
 async function abrirModalProveedorSweet() {
   if (!turnoEstaAbierto()) {
     window.location.href = 'index.html';
@@ -483,33 +549,54 @@ async function abrirModalProveedorSweet() {
   }
   const { value: formValues } = await Swal.fire({
     title: 'Registro de Proveedor',
-    html:
-      `<label>Hora:</label><br><input type="time" id="swal-prov-hora" class="swal2-input" style="width:30%">` +
-      `<label>Patente:</label><br><input type="text" id="swal-prov-patente" class="swal2-input" placeholder="XX-XX-XX" style="width:30%"><br>` +
-      `<label>Conductor:</label><br><input type="text" id="swal-prov-conductor" class="swal2-input" placeholder="Nombre del conductor" style="width:90%"><br>` +
-      `<label>Acompañantes:</label><br><input type="number" min="0" max="9" id="swal-prov-acompanantes" class="swal2-input" value="0" style="width:60px"><br>` +
-      `<label>Empresa:</label><br><input type="text" id="swal-prov-empresa" class="swal2-input" placeholder="Nombre de la Empresa" style="width:90%"><br>` +
-      `<label>Motivo:</label><br><input type="text" id="swal-prov-motivo" class="swal2-input" placeholder="Motivo del proveedor" style="width:90%"><br>`,
-    focusConfirm: false,
-    showCancelButton: true,
-    confirmButtonText: 'Guardar',
-    cancelButtonText: 'Cancelar',
-    preConfirm: () => {
-      const hora = document.getElementById('swal-prov-hora').value;
-      const patente = document.getElementById('swal-prov-patente').value;
-      const conductor = document.getElementById('swal-prov-conductor').value;
-      const acompanantes = document.getElementById('swal-prov-acompanantes').value;
-      const empresa = document.getElementById('swal-prov-empresa').value;
-      const motivo = document.getElementById('swal-prov-motivo').value;
-      if (!hora || !patente || !conductor || acompanantes === '' || !empresa || !motivo) {
-        Swal.showValidationMessage('Complete todos los campos del proveedor.');
-        return false;
-      }
-      if (isNaN(Number(acompanantes)) || Number(acompanantes) < 0) {
-        Swal.showValidationMessage('El número de acompañantes debe ser 0 o mayor.');
-        return false;
-      }
-      return { hora, patente, conductor, acompanantes, empresa, motivo };
+        html: proveedorHTML,
+        customClass: {
+          popup: 'custom-popup'
+        },
+        width: '700px',
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Guardar',
+        cancelButtonText: 'Cancelar',
+        didOpen: () => {
+          const ahora = new Date();
+          const horaActual = ahora.toTimeString().substring(0,5);
+          const inputHora = document.getElementById('swal-prov-hora');
+          inputHora.value = horaActual;
+          inputHora.max = horaActual;
+
+          const inputPatente = document.getElementById('swal-prov-patente');
+          inputPatente.addEventListener('input', (e) => {
+            let raw = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0,6);
+            let format = raw.replace(/(.{2})(.{2})?(.*)?/, (m, p1, p2, p3) => {
+              return [p1, p2, p3].filter(Boolean).join('-');
+            });
+            e.target.value = format;
+          });
+        },
+        preConfirm: () => {
+          const hora = document.getElementById('swal-prov-hora').value;
+          const patente = document.getElementById('swal-prov-patente').value;
+          const conductor = document.getElementById('swal-prov-conductor').value;
+          const acompanantes = document.getElementById('swal-prov-acompanantes').value;
+          const empresa = document.getElementById('swal-prov-empresa').value;
+          const motivo = document.getElementById('swal-prov-motivo').value;
+
+          if (!hora || !patente || !conductor || acompanantes === '' || !empresa || !motivo) {
+            Swal.showValidationMessage('Complete todos los campos del proveedor.');
+            return false;
+          }
+
+          if (!/^([A-Z0-9]{2}-){2}[A-Z0-9]{2}$/.test(patente)) {
+            Swal.showValidationMessage('Formato de patente inválido. Debe ser del tipo XX-XX-XX');
+            return false;
+          }
+
+          if (isNaN(Number(acompanantes)) || Number(acompanantes) < 0) {
+            Swal.showValidationMessage('El número de acompañantes debe ser 0 o mayor.');
+            return false;
+          }
+    return { hora, patente, conductor, acompanantes, empresa, motivo };
     }
   });
   if (formValues) {
@@ -527,17 +614,8 @@ async function abrirModalProveedorSweet() {
     Swal.fire('Proveedor guardado', '', 'success');
   }
 }
-// Forzar z-index alto para SweetAlert2
-if (window.Swal) {
-  Swal.mixin({
-    customClass: {
-      popup: 'swal2-zindex-fix'
-    }
-  });
-}
 
 document.addEventListener("DOMContentLoaded", function() {
-  // ...existing code...
   const abrirRegistroBtn = document.getElementById('abrirRegistroBtn');
   if (abrirRegistroBtn) {
     abrirRegistroBtn.addEventListener('click', abrirModalRegistroSweet);
@@ -546,10 +624,10 @@ document.addEventListener("DOMContentLoaded", function() {
   if (abrirProveedorBtn) {
     abrirProveedorBtn.addEventListener('click', abrirModalProveedorSweet);
   }
-  // ...existing code...
 });
 
 // --- SCROLL AUTOMÁTICO Y CIERRE POR FONDO EN MODALES ---
+
 function mostrarModalConScroll(modalId) {
   const modal = document.getElementById(modalId);
   if (!modal) return;
@@ -568,10 +646,3 @@ function habilitarCierrePorFondo(modalId, exceptModalIds = []) {
     }
   });
 }
-
-// Aplicar a los modales estándar al cargar
-['modal', 'modalProveedor', 'modalReportes', 'modalNotificacion'].forEach(id => {
-  document.addEventListener('DOMContentLoaded', function() {
-    habilitarCierrePorFondo(id, ['modalInicioTurno']);
-  });
-});

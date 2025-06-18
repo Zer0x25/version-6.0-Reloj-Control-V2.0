@@ -50,6 +50,23 @@ label {
   font-weight: bold;
   color: #555;
 }
+.cabecera-turno {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: clamp(9px, 2vw, 27px);
+  background: #f7f7e6;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: clamp(5px, 1.1vw, 15px) clamp(5px, 1.1vw, 15px);
+  font-size: clamp(15px, 1.9vw, 27px);
+  margin-bottom: clamp(15px, 2.1vw, 30px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.cabecera-turno strong {
+  color: #2c3e50;
+}
 /* =========================
    FORMULARIOS
 ========================= */
@@ -74,6 +91,54 @@ select:disabled {
   color: #888 !important;
   cursor: not-allowed;
 }
+/*|=========================
+   ALERTAS Y FORMULARIOS DE ALERTA */
+
+.formulario-alerta {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2em;
+  text-align: left;
+}
+
+.fila {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.fila label {
+  width: 30%;
+  font-weight: bold;
+}
+
+.campo-input {
+  flex: 1;
+  margin: 0;
+}
+
+.campo-textarea {
+  flex: 1;
+  min-height: 60px;
+  margin: 0;
+}
+
+.campo-hora {
+      flex: 0;
+    }
+
+.campo-acompanantes {
+      flex: 0;
+    }
+
+.swal2-popup {
+      box-sizing: border-box;
+      max-height: 98vw;
+      max-width: 98vw;
+      overflow-y: auto;
+      overflow-x: auto;
+    }
+
 /* =========================
    BOTONES GENERALES
 ========================= */
@@ -98,6 +163,23 @@ button:disabled {
 /* =========================
    BOTONES ESPECÍFICOS
 ========================= */
+.admin-button {
+  width: auto;
+  background: #9eb1b1;
+  border: 1px solid #7ea2c0;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: first baseline;
+  transition: background 0.2s, border 0.2s;
+  padding: clamp(8px, 1vw, 15px) clamp(8px, 1vw, 15px);
+  margin: 0 0 0 0;
+  box-shadow: 0 2px 6px #aaa;
+}
+.admin-button:hover {
+  background: #bbdefb;
+  border-color: #1976d2;
+}
 .admin-buttons {
   display: flex;
   flex-wrap: wrap;
@@ -145,22 +227,36 @@ button:disabled {
   background: #ffcdd2;
   border-color: #e57373;
 }
-.admin-button {
-  width: auto;
-  background: #9eb1b1;
-  border: 1px solid #7ea2c0;
-  border-radius: 10px;
+.btn2 {
+  color: #333;
+  border-radius: 6px;
   cursor: pointer;
   display: flex;
-  align-items: first baseline;
+  align-items: center;
+  justify-content: flex-start;
   transition: background 0.2s, border 0.2s;
-  padding: clamp(8px, 1vw, 15px) clamp(8px, 1vw, 15px);
-  margin: 0 0 0 0;
-  box-shadow: 0 2px 6px #aaa;
+  gap: clamp(10px, 1vw, 20px) !important;
 }
-.admin-button:hover {
-  background: #bbdefb;
-  border-color: #1976d2;
+.btn-inicio-turno {
+  background: #f0f0f0;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  transition: background 0.2s, border 0.2s;
+  gap: clamp(10px, 1vw, 20px) !important;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row-reverse;
+  margin: 0;
+  font-size: clamp(20px, 3.5vw, 30px);
+  color: #333;
 }
 .icono-modo {
   font-size: 16px;
@@ -555,7 +651,6 @@ input#nuevaFechaHoraInput {
   position: relative;
   animation: modalFadeIn 0.3s;
   overflow-y: auto;
-  width: auto;
 }
 .label-entradaSalida {
   font-size: 1em;
@@ -566,6 +661,12 @@ input#nuevaFechaHoraInput {
   from { opacity: 0; transform: translateY(40px); }
   to { opacity: 1; transform: translateY(0); }
 }
+#modalReportes {
+  align-items: normal;
+}
+#modalInicioTurno {
+  align-items: normal;
+  }
 .modal-close {
   position: absolute;
   top: 10px;
@@ -575,7 +676,7 @@ input#nuevaFechaHoraInput {
   background: none;
   border: none;
   cursor: pointer;
-  z-index: -10;
+  z-index: 10;
   transition: color 0.2s;
 }
 .modal-close:hover {
@@ -759,23 +860,33 @@ body.dark-mode .modal-close:hover {
   border-radius: 4px;
   margin-bottom: 1em;
 }
+.f-content {
+  margin-bottom: 0.5em;
+}
 .filters-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 10px;
+  gap: 0.2em;
   font-size: 1.2em;
-  margin-bottom: 1em;
+  margin-bottom: 0.5em;
+}
+.filters-grid2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.2em;
+  font-size: 1.2em;
+  margin-bottom: 0.3em;
 }
 .filters-grid label {
   margin: 0;
-  font-size: 0.9em;
+  font-size: clamp(15px, 2vw, 20px);
 }
 .filters-grid input,
 .filters-grid select {
   width: 100%;
-  padding: 6px;
+  padding: 0.2em;
   margin-bottom: 0;
-  font-size: 0.9em;
+  font-size: clamp(15px, 2vw, 20px);
 }
 .filter-actions {
   display: flex;
@@ -832,11 +943,6 @@ body.dark-mode .modal-close:hover {
     width: 98vw;
     min-width: unset;
     padding: 18px 6px 12px 6px;
-  }
-  #modalInicioTurno {
-    width: 98vw;
-    max-width: 98vw;
-    min-width: unset;
   }
   input[type="text"],
   input[type="date"],

@@ -104,15 +104,14 @@
       </div>
     </div>
   </div>  
-  
-  <div>
-    <button type="button" class="collapsible-button">Tabla de Registros // Filtros<span class="icono-filtros">▼ (Mostrar/Ocultar)</span></button>
-    </button>
-  </div>
+    <div>
+      <button type="button" class="collapsible-button">Tabla de Registros // Filtros<span class="icono-filtros">▼ (Mostrar/Ocultar)</span></button>
+    </div>
   </div>
 
-<div class="filters-content">
+<div class="filters-content f-content">
   <div class="filters-grid">
+    <div class="filters-grid2">
     <div>
       <label for="filtroNombre">Nombre:</label>
       <input type="text" id="filtroNombre" oninput="mostrarRegistros()">
@@ -123,6 +122,8 @@
         <option value="">Todos</option>
       </select>
     </div>
+    </div>
+    <div class="filters-grid2">
     <div>
       <label for="filtroDesde">Desde:</label>
       <input type="date" id="filtroDesde" onchange="mostrarRegistros()">
@@ -130,6 +131,8 @@
     <div>
       <label for="filtroHasta">Hasta:</label>
       <input type="date" id="filtroHasta" onchange="mostrarRegistros()">
+    
+    </div>
     </div>
   </div>
   <!-- Ejemplo para botones de filtros y exportación -->
