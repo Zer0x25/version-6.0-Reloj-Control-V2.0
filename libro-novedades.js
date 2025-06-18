@@ -9,12 +9,6 @@ try {
   document.getElementById("fecha").valueAsDate = new Date();
 } catch(e) {}
 
-function cerrarModal() {
-  document.getElementById("modal").style.display = "none";
-  document.getElementById("inputHora").value = "";
-  document.getElementById("inputNota").value = "";
-}
-
 function sweetAlertError(msg) {
   if (window.Swal) {
     Swal.fire({icon:'warning', title:'Atención', text:msg, confirmButtonText:'OK'});
@@ -35,15 +29,6 @@ function guardarRegistroDesdeModal() {
 
   agregarRegistroATabla(hora, nota);
   cerrarModal();
-}
-
-function cerrarProveedorModal() {
-  document.getElementById("modalProveedor").style.display = "none";
-  document.getElementById("provHora").value = "";
-  document.getElementById("provPatente").value = "";
-  document.getElementById("provConductor").value = "";
-  document.getElementById("provAcompanantes").value = "";
-  document.getElementById("provMotivo").value = "";
 }
 
 function guardarProveedor() {
@@ -128,7 +113,7 @@ function mostrarModalInicioTurno() {
   document.getElementById('fechaInicioTurno').value = obtenerFechaHoy();
   // Cargar responsables (empleados con cargo "Reloj Control")
   cargarResponsablesRelojControl();
-  document.getElementById('modalInicioTurno').style.display = 'flex';
+  mostrarModalConScroll('modalInicioTurno');
   mostrarUltimoReporteEnModalInicioTurno();
   reemplazarBotonIniciarPorHeLeido();
 }
@@ -281,18 +266,38 @@ function mostrarNotificacionTurnoCerrado(mensaje, callback) {
   };
 }
 
-function agregarRegistroATabla(hora, nota) {
-  const tbody = document.getElementById("tabla-guardados").querySelector("tbody");
+// --- UTILIDADES GENERICAS PARA MODALES Y TABLAS ---
+function cerrarYLimpiarModal(modalId, campos) {
+  document.getElementById(modalId).style.display = "none";
+  campos.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+}
+
+function agregarFilaATabla(tablaId, valores) {
+  const tbody = document.getElementById(tablaId).querySelector("tbody");
   const fila = document.createElement("tr");
-  fila.innerHTML = `<td>${hora}</td><td>${nota}</td>`;
+  fila.innerHTML = valores.map(v => `<td>${v}</td>`).join("");
   tbody.appendChild(fila);
 }
 
+// --- MODALES ---
+function cerrarModal() {
+  cerrarYLimpiarModal("modal", ["inputHora", "inputNota"]);
+}
+
+function cerrarProveedorModal() {
+  cerrarYLimpiarModal("modalProveedor", ["provHora", "provPatente", "provConductor", "provAcompanantes", "provMotivo"]);
+}
+
+// --- AGREGAR FILAS A TABLAS ---
+function agregarRegistroATabla(hora, nota) {
+  agregarFilaATabla("tabla-guardados", [hora, nota]);
+}
+
 function agregarProveedorATabla(hora, patente, conductor, acompanantes, empresa, motivo) {
-  const tbody = document.getElementById("tabla-proveedores").querySelector("tbody");
-  const fila = document.createElement("tr");
-  fila.innerHTML = `<td>${hora}</td><td>${patente}</td><td>${conductor}</td><td>${acompanantes}</td><td>${empresa || '-'}</td><td>${motivo}</td>`;
-  tbody.appendChild(fila);
+  agregarFilaATabla("tabla-proveedores", [hora, patente, conductor, acompanantes, empresa || '-', motivo]);
 }
 
 function abrirModalReportes() {
@@ -332,7 +337,7 @@ function abrirModalReportes() {
       });
     }, 0);
   }
-  modal.style.display = 'flex';
+  mostrarModalConScroll('modalReportes');
 }
 
 // Modal detalle de reporte sin paginación
@@ -522,6 +527,14 @@ async function abrirModalProveedorSweet() {
     Swal.fire('Proveedor guardado', '', 'success');
   }
 }
+// Forzar z-index alto para SweetAlert2
+if (window.Swal) {
+  Swal.mixin({
+    customClass: {
+      popup: 'swal2-zindex-fix'
+    }
+  });
+}
 
 document.addEventListener("DOMContentLoaded", function() {
   // ...existing code...
@@ -531,17 +544,34 @@ document.addEventListener("DOMContentLoaded", function() {
   }
   const abrirProveedorBtn = document.getElementById('abrirProveedorBtn');
   if (abrirProveedorBtn) {
-    abrirProveedorBtn.removeEventListener('click', abrirProveedorModal); // por si acaso
     abrirProveedorBtn.addEventListener('click', abrirModalProveedorSweet);
   }
   // ...existing code...
 });
 
-// Forzar z-index alto para SweetAlert2
-if (window.Swal) {
-  Swal.mixin({
-    customClass: {
-      popup: 'swal2-zindex-fix'
+// --- SCROLL AUTOMÁTICO Y CIERRE POR FONDO EN MODALES ---
+function mostrarModalConScroll(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  modal.style.display = 'flex';
+  setTimeout(() => {
+    modal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 50);
+}
+
+function habilitarCierrePorFondo(modalId, exceptModalIds = []) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  modal.addEventListener('mousedown', function(e) {
+    if (e.target === modal && !exceptModalIds.includes(modalId)) {
+      modal.style.display = 'none';
     }
   });
 }
+
+// Aplicar a los modales estándar al cargar
+['modal', 'modalProveedor', 'modalReportes', 'modalNotificacion'].forEach(id => {
+  document.addEventListener('DOMContentLoaded', function() {
+    habilitarCierrePorFondo(id, ['modalInicioTurno']);
+  });
+});

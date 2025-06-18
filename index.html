@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Control de Horario</title>
   <!-- Bootstrap 5 CSS -->
- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+ <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -138,8 +138,8 @@
     <button onclick="exportarCSV()" id="exportarCSVBtn" aria-label="Exportar registros a CSV" title="Exportar registros a CSV">Exportar a CSV</button>
   </div>
 </div>
-<div  class="table-responsive">
-  <table id="registrosTabla" class="table table-hover table-striped table-bordered align-middle">
+  <div id="table-container" class="table-responsive">
+    <table id="registrosTabla" class="table table-hover table-striped table-bordered align-middle">
         <thead>
           <tr>
             <th class="min-width-120">Area</th>
@@ -151,8 +151,8 @@
           </tr>
         </thead>
         <tbody></tbody>
-      </table>
-</div>
+    </table>
+  </div>
 
   <div id="adminPanel" class="admin-panel">
     <div class="admin-header">
@@ -213,7 +213,7 @@
   
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <!-- Bootstrap 5 JS Bundle (con Popper) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
   <script src="utils.js"></script>
   <script src="app.js"></script>
 
@@ -334,5 +334,8 @@ function importarConReset() {
 }
 </script>
 -->
+<footer>
+    <p>© Zer0x App 2025</p>
+</footer>
 </body>
 </html>

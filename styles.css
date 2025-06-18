@@ -6,6 +6,15 @@
 /* =========================
    ESTRUCTURA GENERAL
 ========================= */
+
+/* Reseteo básico de estilos */
+/* Reset básico para eliminar márgenes y paddings por defecto */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: clamp(10px, 3vw, 25px);
@@ -26,7 +35,12 @@ h2 {
   text-align: center;
   font-size: clamp(25px, 5.5vw, 36px);
 }  
-h3, h4 {
+h3 {
+  color: #2c3e50;
+  font-size: clamp(15px, 2vw, 25px);
+  margin: 0.5em;
+}
+h4 {
   color: #2c3e50;
   margin: 0 0 0 0;
 }
@@ -373,18 +387,69 @@ tr:nth-child(even) {
 #registrosTabla td {
   font-weight: normal;
 }
-/* Add your custom styles below this line */
-.min-width-100 { min-width: 100px; } 
-.min-width-120 { min-width: 120px; } 
-.min-width-140 { min-width: 140px; } 
+/* =========================
+   UTILIDADES DE ANCHO REUTILIZABLES
+========================= */
+.min-width-80  { min-width: 80px; }
+.min-width-100 { min-width: 100px; }
+.min-width-120 { min-width: 120px; }
+.min-width-140 { min-width: 140px; }
 .min-width-150 { min-width: 150px; }
-/* Anchos mínimos para las columnas de la tabla de registros, sin colgroup */
-#registrosTabla th:nth-child(1), #registrosTabla td:nth-child(1) { min-width: 120px; }
-#registrosTabla th:nth-child(2), #registrosTabla td:nth-child(2) { min-width: 150px; }
-#registrosTabla th:nth-child(3), #registrosTabla td:nth-child(3) { min-width: 120px; }
-#registrosTabla th:nth-child(4), #registrosTabla td:nth-child(4) { min-width: 140px; }
-#registrosTabla th:nth-child(5), #registrosTabla td:nth-child(5) { min-width: 140px; }
-#registrosTabla th:nth-child(6), #registrosTabla td:nth-child(6) { min-width: 100px; }
+.min-width-160 { min-width: 160px; }
+.min-width-180 { min-width: 180px; }
+.min-width-200 { min-width: 200px; }
+.min-width-220 { min-width: 220px; }
+
+/* =========================
+   TABLAS GENERALES
+========================= */
+#registrosTabla th, #registrosTabla td,
+#tabla-guardados th, #tabla-guardados td,
+#tabla-proveedores th, #tabla-proveedores td {
+  /* Ancho mínimo general para todas las celdas */
+  min-width: 80px;
+}
+
+/* =========================
+   ANCHOS ESPECÍFICOS POR COLUMNA (usa clases en el HTML)
+========================= */
+/* Registros */
+#registrosTabla th.col-area, #registrosTabla td.col-area { min-width: 120px; }
+#registrosTabla th.col-nombre, #registrosTabla td.col-nombre { min-width: 150px; }
+#registrosTabla th.col-cargo, #registrosTabla td.col-cargo { min-width: 120px; }
+#registrosTabla th.col-entrada, #registrosTabla td.col-entrada { min-width: 140px; }
+#registrosTabla th.col-salida, #registrosTabla td.col-salida { min-width: 140px; }
+#registrosTabla th.col-acciones, #registrosTabla td.col-acciones { min-width: 100px; }
+
+/* Libro de Novedades */
+#tabla-guardados th.col-hora, #tabla-guardados td.col-hora { min-width: 100px; }
+#tabla-guardados th.col-anotacion, #tabla-guardados td.col-anotacion { min-width: 220px; }
+
+/* Proveedores */
+#tabla-proveedores th.col-hora, #tabla-proveedores td.col-hora { min-width: 100px; }
+#tabla-proveedores th.col-patente, #tabla-proveedores td.col-patente { min-width: 120px; }
+#tabla-proveedores th.col-conductor, #tabla-proveedores td.col-conductor { min-width: 140px; }
+#tabla-proveedores th.col-acompanantes, #tabla-proveedores td.col-acompanantes { min-width: 100px; }
+#tabla-proveedores th.col-empresa, #tabla-proveedores td.col-empresa { min-width: 140px; }
+#tabla-proveedores th.col-motivo, #tabla-proveedores td.col-motivo { min-width: 180px; }
+
+/* =========================
+   RESPONSIVE: REDUCE ANCHOS EN PANTALLAS PEQUEÑAS
+========================= */
+@media (max-width: 600px) {
+  .min-width-220 { min-width: 120px; }
+  .min-width-180 { min-width: 100px; }
+  .min-width-140, .min-width-150, .min-width-160 { min-width: 80px; }
+}
+
+/* =========================
+   NOTA:
+   Aplica las clases .min-width-XXX en tus <th> y <td> según el ancho deseado.
+   Ejemplo:
+   <th class="col-hora min-width-100">Hora</th>
+   <td class="col-hora min-width-100">08:00</td>
+========================= */
+
 /* =========================
    ESTADOS DE REGISTRO
 ========================= */
@@ -465,19 +530,32 @@ tr.extendido {
 .modal[style*="display: flex"] {
   display: flex !important;
 }
+#editarRegistroModal {
+  display: none; /* Oculto por defecto */
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 3000;
+}
+input#nuevaFechaHoraInput {
+    font-size: 1em;
+}
+
+/* Centrado y estilo del contenido del modal */
+
 .modal-content {
   background-color: #fefefe;
   padding: 32px 24px 24px 24px;
   border: 1px solid #888;
-  width: 100%;
-  max-width: 400px;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.25);
   text-align: center;
   position: relative;
   animation: modalFadeIn 0.3s;
-  max-height: 90vh;
   overflow-y: auto;
+  width: auto;
 }
 .label-entradaSalida {
   font-size: 1em;
@@ -497,7 +575,7 @@ tr.extendido {
   background: none;
   border: none;
   cursor: pointer;
-  z-index: 10;
+  z-index: -10;
   transition: color 0.2s;
 }
 .modal-close:hover {
@@ -645,7 +723,6 @@ body.dark-mode .modal-close:hover {
   display: flex;
   flex-direction: column;
 }
-
 #fechaHoraActual {
   font-weight: bold;
   font-size: clamp(15px, 3.5vw, 24px);
@@ -727,31 +804,6 @@ body.dark-mode .modal-close:hover {
   padding: 1em;
   border: 1px solid #eee;
 }
-#tabla-guardados col.col-hora {
-  width: 100px; min-width: 80px; max-width: 160px;
-}
-#tabla-guardados col.col-anotacion {
-  width: auto;
-}
-#tabla-proveedores col.col-hora {
-  width: 100px; min-width: 80px; max-width: 160px;
-}
-#tabla-proveedores col.col-patente {
-  width: 100px; min-width: 80px; max-width: 160px;
-}
-#tabla-proveedores col.col-conductor {
-  width: 160px; min-width: 120px; max-width: 200px;
-}
-#tabla-proveedores col.col-acompanantes {
-  width: 50px; min-width: 40px; max-width: 60px;
-}
-#tabla-proveedores col.col-empresa {
-  width: 160px; min-width: 120px; max-width: 200px;
-}
-#tabla-proveedores col.col-motivo {
-  width: auto;
-}
-
 /* =========================
    RESPONSIVE
 ========================= */
@@ -785,14 +837,6 @@ body.dark-mode .modal-close:hover {
     width: 98vw;
     max-width: 98vw;
     min-width: unset;
-  }
-  .modal-content {
-    font-size: 1em;
-    width: 98vw;
-    max-width: 98vw;
-    min-width: unset;
-    padding: 18px 4vw 18px 4vw;
-    margin: 10% auto;
   }
   input[type="text"],
   input[type="date"],
@@ -845,7 +889,8 @@ body.dark-mode .modal-close:hover {
   }
 }
 /* =========================
-   MODO OSCURO
+   MODO OSCURO (DARK MODE)
+   Todas las reglas dark-mode agrupadas y ordenadas
 ========================= */
 body.dark-mode {
   background: #23272f;
@@ -900,17 +945,19 @@ body.dark-mode .admin-button:hover {
   background: #ffe066;
   color: #23272f;
 }
-
 /* Modales */
-
 body.dark-mode .modal-content {
   background: #23272f;
   color: #ffe066;
   border: 1px solid #ffe066;
 }
-
+body.dark-mode .modal-close {
+  color: #ffe066;
+}
+body.dark-mode .modal-close:hover {
+  color: #e74a0b;
+}
 /* Filtros y colapsables */
-
 body.dark-mode .collapsible-button {
   background: #23272f;
   color: #ffe066;
@@ -935,26 +982,7 @@ body.dark-mode .tabla-box {
   color: #ffe066;
   border: 1px solid #ffe066;
 }
-
-/* =========================
-   CABECERA DE TURNO */
-
-.cabecera-turno {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1.5em;
-  background: #f7f7e6;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 0.7em 1.2em;
-  font-size: 1.15em;
-  margin-bottom: 1.2em;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-}
-.cabecera-turno strong {
-  color: #2c3e50;
-}
+/* Cabecera de turno */
 body.dark-mode .cabecera-turno {
   background: #23272f;
   color: #ffe066;
@@ -962,77 +990,4 @@ body.dark-mode .cabecera-turno {
 }
 body.dark-mode .cabecera-turno strong {
   color: #ffe066;
-}
-#modalInicioTurno input[readonly], 
-#modalInicioTurno input[disabled], 
-#modalInicioTurno select[disabled] {
-  background: #e0e0e0;
-  color: #888;
-  cursor: not-allowed;
-}
-#modalInicioTurno {
-  z-index: 2000;
-}
-#modalInicioTurno 
-.modal-content {
-  width: 80vw;
-  max-width: 900px;
-  min-width: 320px;
-}
-#modalReportes .modal-content {
-  width: 80vw;
-  max-width: 1200px;
-  min-width: 320px;
-}
-.swal2-container.swal2-center.swal2-backdrop-show,
-.swal2-popup.swal2-zindex-fix {
-  z-index: 3000 !important;
-}
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px 32px;
-  align-items: end;
-}
-.form-grid label {
-  display: block;
-  margin-bottom: 4px;
-}
-.form-grid input,
-.form-grid select {
-  width: 100%;  
-  box-sizing: border-box;
-}
-
-/* Centrado absoluto y fondo semitransparente para el overlay del modal */
-
-#editarRegistroModal {
-  display: none; /* Oculto por defecto */
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  align-items: center;
-  justify-content: center;
-  background: rgba(40,40,40,0.35);
-  z-index: 3000;
-}
-
-/* Centrado y estilo del contenido del modal */
-
-#editarRegistroModal 
-.modal-content {
-  background: #fff;
-  border-radius: 18px;
-  padding: 32px 28px 20px 28px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-  min-width: 320px;
-  max-width: 95vw;
-  width: 400px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  margin: 0 auto;
-}
-input#nuevaFechaHoraInput {
-    font-size: 1em;
 }

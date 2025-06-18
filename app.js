@@ -841,6 +841,35 @@ function agregarComentarioRegistro(uid) {
     }
   });
 }
+// Habilitar scroll horizontal por arrastre en el contenedor de la tabla
+function habilitarArrastreScrollHorizontal(idContenedor) {
+  const contenedor = document.getElementById(idContenedor);
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
+  contenedor.addEventListener('mousedown', (e) => {
+    isDown = true;
+    contenedor.classList.add('arrastrando');
+    startX = e.pageX - contenedor.offsetLeft;
+    scrollLeft = contenedor.scrollLeft;
+  });
+  contenedor.addEventListener('mouseleave', () => {
+    isDown = false;
+    contenedor.classList.remove('arrastrando');
+  });
+  contenedor.addEventListener('mouseup', () => {
+    isDown = false;
+    contenedor.classList.remove('arrastrando');
+  });
+  contenedor.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - contenedor.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    contenedor.scrollLeft = scrollLeft - walk;
+  });
+}
 
 // --- Inicialización al cargar el DOM ---
 
@@ -857,5 +886,6 @@ document.addEventListener("DOMContentLoaded", function() {
     actualizarFechaHora();
     cargarEmpleados();
     mostrarRegistros();
+    habilitarArrastreScrollHorizontal('table-container');
   });
 
