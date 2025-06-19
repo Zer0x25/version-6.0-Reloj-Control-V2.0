@@ -5,8 +5,18 @@ const LS_PROVEEDORES = "libro-novedades-proveedores";
 const LS_TURNOS_CERRADOS = "libro-novedades-turnos-cerrados";
 const LS_TURNO_ABIERTO = "libro-novedades-turno-abierto";
 
+// Corrige la asignación de la fecha para evitar desfase por zona horaria
+function obtenerFechaHoy() {
+  // Devuelve la fecha local en formato YYYY-MM-DD
+  const hoy = new Date();
+  const year = hoy.getFullYear();
+  const month = (hoy.getMonth() + 1).toString().padStart(2, '0');
+  const day = hoy.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 try {
-  document.getElementById("fecha").valueAsDate = new Date();
+  document.getElementById("fecha").value = obtenerFechaHoy();
 } catch(e) {}
 
 function sweetAlertError(msg) {

@@ -1,7 +1,10 @@
 // Obtener la fecha de hoy en formato YYYY-MM-DD
 function obtenerFechaHoy() {
   const hoy = new Date();
-  return hoy.toISOString().split('T')[0];
+  const year = hoy.getFullYear();
+  const month = (hoy.getMonth() + 1).toString().padStart(2, '0');
+  const day = hoy.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 // Obtener la hora actual en formato HH:MM
