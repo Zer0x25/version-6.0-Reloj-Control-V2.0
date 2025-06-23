@@ -1,17 +1,27 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
+ <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Control de Horario</title>
   <!-- Bootstrap 5 CSS -->
  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
  <link rel="stylesheet" href="styles.css">
+ <style>
+    .hidden {
+      display: none;
+    }
+ </style>
 </head>
+ 
 <body>
-    <!-- Botón Libro de Novedades boton-flotante -->
+    
+  <div id="controlHorarioSection">
+
+<!-- Botón Libro de Novedades boton-flotante -->
+
     <button class="boton-flotante libro-novedades-btn" id="libroNovedadesBtn" aria-label="Libro de Novedades" title="Libro de Novedades">
-    <svg width="32px" height="32px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+      <svg width="32px" height="32px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
   <g id="book" clip-path="url(#clip-book)">
     <g id="Group_2974" data-name="Group 2974" transform="translate(-364 -156)">
       <g id="Group_2957" data-name="Group 2957">
@@ -60,285 +70,319 @@
       </g>
     </g>
   </g>
-</svg>
-     </button>
-  <h2>Reloj Control - Espacio OX</h2>
-  
-  <div class="header-main">
-      <div class="header-selection">
-        <input type="search" id="busquedaEmpleado" list="listaBusqueda" placeholder="Buscar empleado por nombre..." aria-label="Buscar empleado" title="Buscar empleado" autocomplete="off" />
-        <datalist id="listaBusqueda"></datalist>
-        <div class="botones-centrados">
-          <button class="entrada-btn" id="entradaBtn" aria-label="Registrar entrada" title="Registrar entrada">
-            Entrada
-           </button>
-          <button class="salida-btn" id="salidaBtn" aria-label="Registrar salida" title="Registrar salida">
-            Salida
-           </button>
+      </svg>
+    </button>
+    <h2>Reloj Control - Espacio OX</h2>
+    
+    <div class="header-main">
+          <div class="header-selection">
+            <input type="search" id="busquedaEmpleado" list="listaBusqueda" placeholder="Buscar empleado por nombre..." aria-label="Buscar empleado" title="Buscar empleado" autocomplete="off" />
+            <datalist id="listaBusqueda"></datalist>
+            <div class="botones-centrados">
+              <button class="entrada-btn" id="entradaBtn" aria-label="Registrar entrada" title="Registrar entrada">
+                Entrada
+               </button>
+              <button class="salida-btn" id="salidaBtn" aria-label="Registrar salida" title="Registrar salida">
+                Salida
+               </button>
+            </div>
+          </div>
+        <div class="header-actions">
+          <div class="head-fecha" id="fechaHoraActual"></div>
+          <div class="main-actions">
+              <button class="admin-button" id="toggleDarkMode" aria-label="Modo oscuro/claro" title="Modo oscuro/claro">
+                <span class="icono-modo">🌙</span>
+              </button>
+              <button class="admin-button" id="adminBtn" aria-label="Administrar empleados" title="Administrar empleados">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="24" fill="black" viewBox="0 0 32 32">
+                  <path d="M31.7,20.9c-0.1-0.5-0.7-0.8-1.2-0.7c-0.7,0.2-1.2,0-1.3-0.2c-0.1-0.2,0-0.7,0.5-1.3c0.4-0.4,0.4-1,0-1.4
+                    c-1-1-2.2-1.7-3.6-2.1c-0.5-0.1-1.1,0.2-1.2,0.7c-0.2,0.7-0.6,1-0.9,1s-0.6-0.4-0.9-1c-0.2-0.5-0.7-0.8-1.2-0.7
+                    c-1.4,0.4-2.6,1.1-3.6,2.1c-0.4,0.4-0.4,1,0,1.4c0.5,0.5,0.6,1,0.5,1.3c-0.1,0.2-0.6,0.4-1.3,0.2c-0.5-0.1-1.1,0.2-1.2,0.7
+                    C16.1,21.6,16,22.3,16,23s0.1,1.4,0.3,2.1c0.1,0.5,0.7,0.8,1.2,0.7c0.7-0.2,1.2,0,1.3,0.2c0.1,0.2,0,0.7-0.5,1.3
+                    c-0.4,0.4-0.4,1,0,1.4c1,1,2.2,1.7,3.6,2.1c0.1,0,0.2,0,0.3,0c0.4,0,0.8-0.3,1-0.7c0.2-0.7,0.6-1,0.9-1s0.6,0.4,0.9,1
+                    c0.2,0.5,0.7,0.8,1.2,0.7c1.4-0.4,2.6-1.1,3.6-2.1c0.4-0.4,0.4-1,0-1.4c-0.5-0.5-0.6-1-0.5-1.3c0.1-0.2,0.6-0.4,1.3-0.2
+                    c0.5,0.1,1.1-0.2,1.2-0.7c0.2-0.7,0.3-1.4,0.3-2.1S31.9,21.6,31.7,20.9z M24,27c-2.2,0-4-1.8-4-4s1.8-4,4-4c2.2,0,4,1.8,4,4
+                    S26.2,27,24,27z"/>
+                  <path d="M14,23c0-1.2,0.2-2.3,0.6-3.3c0-0.1,0-0.1,0-0.2c0,0,0.1-0.1,0.1-0.1c0.5-1.2,1.1-2.2,1.9-3.1c0.1-0.4,0.2-0.7,0.3-1.1
+                    c0-0.3,0-0.6-0.2-0.8S16.2,14,15.9,14c-1.1,0-2.1-0.4-2.9-1h6c0.6,0,1-0.4,1-1s-0.4-1-1-1h-0.2v-0.2c0-1.8-0.6-3.4-1.6-4.8l-0.7,2.5
+                    c-0.1,0.4-0.5,0.7-1,0.7c-0.1,0-0.2,0-0.3,0c-0.5-0.2-0.8-0.7-0.7-1.2l1.2-4.1c0-0.3-0.2-0.6-0.5-0.8c-2.6-1.3-5.7-1.3-8.3,0
+                    C6.5,3.1,6.4,3.5,6.3,3.8l1.2,4.1c0.2,0.5-0.2,1.1-0.7,1.2c-0.1,0-0.2,0-0.3,0c-0.4,0-0.8-0.3-1-0.7L4.9,6c-1,1.4-1.6,3-1.6,4.8V11
+                    H3c-0.6,0-1,0.4-1,1s0.4,1,1,1h2v1c0,2.2,0.9,4.2,2.4,5.5c-0.2,1.4-1.1,2.6-2.5,3c-2.5,0.7-4.4,2.9-5,5.7c-0.1,0.5,0,0.9,0.3,1.3
+                    C0.6,29.8,1,30,1.5,30h15.4C15.1,28.2,14,25.7,14,23z"/>
+                </svg>
+              </button>
+          </div>
         </div>
-      </div>     
-    <div class="header-actions">
-      <div class="head-fecha" id="fechaHoraActual"></div>  
-      <div class="main-actions">
-          <button class="admin-button" id="toggleDarkMode" aria-label="Modo oscuro/claro" title="Modo oscuro/claro">
-            <span class="icono-modo">🌙</span>
-          </button>
-          <button class="admin-button" id="adminBtn" aria-label="Administrar empleados" title="Administrar empleados">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="24" fill="black" viewBox="0 0 32 32">
-              <path d="M31.7,20.9c-0.1-0.5-0.7-0.8-1.2-0.7c-0.7,0.2-1.2,0-1.3-0.2c-0.1-0.2,0-0.7,0.5-1.3c0.4-0.4,0.4-1,0-1.4
-                c-1-1-2.2-1.7-3.6-2.1c-0.5-0.1-1.1,0.2-1.2,0.7c-0.2,0.7-0.6,1-0.9,1s-0.6-0.4-0.9-1c-0.2-0.5-0.7-0.8-1.2-0.7
-                c-1.4,0.4-2.6,1.1-3.6,2.1c-0.4,0.4-0.4,1,0,1.4c0.5,0.5,0.6,1,0.5,1.3c-0.1,0.2-0.6,0.4-1.3,0.2c-0.5-0.1-1.1,0.2-1.2,0.7
-                C16.1,21.6,16,22.3,16,23s0.1,1.4,0.3,2.1c0.1,0.5,0.7,0.8,1.2,0.7c0.7-0.2,1.2,0,1.3,0.2c0.1,0.2,0,0.7-0.5,1.3
-                c-0.4,0.4-0.4,1,0,1.4c1,1,2.2,1.7,3.6,2.1c0.1,0,0.2,0,0.3,0c0.4,0,0.8-0.3,1-0.7c0.2-0.7,0.6-1,0.9-1s0.6,0.4,0.9,1
-                c0.2,0.5,0.7,0.8,1.2,0.7c1.4-0.4,2.6-1.1,3.6-2.1c0.4-0.4,0.4-1,0-1.4c-0.5-0.5-0.6-1-0.5-1.3c0.1-0.2,0.6-0.4,1.3-0.2
-                c0.5,0.1,1.1-0.2,1.2-0.7c0.2-0.7,0.3-1.4,0.3-2.1S31.9,21.6,31.7,20.9z M24,27c-2.2,0-4-1.8-4-4s1.8-4,4-4c2.2,0,4,1.8,4,4
-                S26.2,27,24,27z"/>
-              <path d="M14,23c0-1.2,0.2-2.3,0.6-3.3c0-0.1,0-0.1,0-0.2c0,0,0.1-0.1,0.1-0.1c0.5-1.2,1.1-2.2,1.9-3.1c0.1-0.4,0.2-0.7,0.3-1.1
-                c0-0.3,0-0.6-0.2-0.8S16.2,14,15.9,14c-1.1,0-2.1-0.4-2.9-1h6c0.6,0,1-0.4,1-1s-0.4-1-1-1h-0.2v-0.2c0-1.8-0.6-3.4-1.6-4.8l-0.7,2.5
-                c-0.1,0.4-0.5,0.7-1,0.7c-0.1,0-0.2,0-0.3,0c-0.5-0.2-0.8-0.7-0.7-1.2l1.2-4.1c0-0.3-0.2-0.6-0.5-0.8c-2.6-1.3-5.7-1.3-8.3,0
-                C6.5,3.1,6.4,3.5,6.3,3.8l1.2,4.1c0.2,0.5-0.2,1.1-0.7,1.2c-0.1,0-0.2,0-0.3,0c-0.4,0-0.8-0.3-1-0.7L4.9,6c-1,1.4-1.6,3-1.6,4.8V11
-                H3c-0.6,0-1,0.4-1,1s0.4,1,1,1h2v1c0,2.2,0.9,4.2,2.4,5.5c-0.2,1.4-1.1,2.6-2.5,3c-2.5,0.7-4.4,2.9-5,5.7c-0.1,0.5,0,0.9,0.3,1.3
-                C0.6,29.8,1,30,1.5,30h15.4C15.1,28.2,14,25.7,14,23z"/>
-            </svg>
-          </button>
+    </div>
+        <div>
+          <button type="button" class="collapsible-button">Tabla de Registros // Filtros<span class="icono-filtros">▼ (Mostrar/Ocultar)</span></button>
+        </div>
+
+    <div class="filters-content f-content">
+      <div class="filters-grid">
+        <div class="filters-grid2">
+        <div>
+          <label for="filtroNombre">Nombre:</label>
+          <input type="text" id="filtroNombre" oninput="mostrarRegistros()">
+        </div>
+        <div>
+          <label for="filtroArea">Area:</label>
+          <select id="filtroArea" onchange="mostrarRegistros()">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        </div>
+        <div class="filters-grid2">
+        <div>
+          <label for="filtroDesde">Desde:</label>
+          <input type="date" id="filtroDesde" onchange="mostrarRegistros()">
+        </div>
+        <div>
+          <label for="filtroHasta">Hasta:</label>
+          <input type="date" id="filtroHasta" onchange="mostrarRegistros()">
+
+        </div>
+        </div>
+      </div>
+      <!-- Ejemplo para botones de filtros y exportación -->
+      <div class="filter-actions">
+        <button onclick="limpiarFiltros()" id="limpiarFiltrosBtn" aria-label="Limpiar filtros" title="Limpiar filtros">Limpiar Filtros</button>
+        <button onclick="exportarCSV()" id="exportarCSVBtn" aria-label="Exportar registros a CSV" title="Exportar registros a CSV">Exportar a CSV</button>
       </div>
     </div>
-  </div>  
-    <div>
-      <button type="button" class="collapsible-button">Tabla de Registros // Filtros<span class="icono-filtros">▼ (Mostrar/Ocultar)</span></button>
+      
+    <div id="table-container" class="table-responsive">
+        <table id="registrosTabla" class="table table-hover table-striped table-bordered align-middle">
+            <thead>
+              <tr>
+                <th class="min-width-120">Area</th>
+                <th class="min-width-150">Nombre</th>
+                <th class="min-width-120">Cargo</th>
+                <th class="min-width-140">Entrada</th>
+                <th class="min-width-140">Salida</th>
+                <th class="min-width-100">Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </div>
-  </div>
 
-<div class="filters-content f-content">
-  <div class="filters-grid">
-    <div class="filters-grid2">
-    <div>
-      <label for="filtroNombre">Nombre:</label>
-      <input type="text" id="filtroNombre" oninput="mostrarRegistros()">
+    <div id="adminPanel" class="admin-panel">
+        <div class="admin-header">
+          <h3>Administrar Empleados</h3>
+          <button class="close-button" onclick="toggleAdmin()">×</button>
+        </div>
+
+        <div class="admin-form-grid">
+          <div class="form-group">
+            <label for="adminId">ID:</label>
+            <input type="text" id="adminId" readonly>
+          </div>
+          <div class="form-group">
+            <label for="adminNombre">Nombre:</label>
+            <input type="text" id="adminNombre">
+          </div>
+          <div class="form-group">
+            <label for="adminCargo">Cargo:</label>
+            <input type="text" id="adminCargo">
+          </div>
+          <div class="form-group">
+            <label for="adminArea">Area:</label>
+            <input type="text" id="adminArea">
+          </div>
+        </div>
+
+        <div class="admin-buttons">
+          <button class="admin-buttons2" onclick="nuevoEmpleado()" aria-label="Nuevo empleado" title="Nuevo empleado">Crear Nuevo</button>
+          <button class="admin-buttons2" onclick="guardarEmpleado()" aria-label="Guardar o actualizar empleado" title="Guardar o actualizar empleado">Guardar/Actualizar</button>
+          <button class="admin-buttons2" onclick="eliminarEmpleado()" aria-label="Eliminar empleado" title="Eliminar empleado">Eliminar</button>
+          <button class="cancel-button" onclick="toggleAdmin()" aria-label="Cancelar y cerrar panel" title="Cancelar y cerrar panel">Cancelar</button>
+        </div>
+
+        <h4>Lista actual de empleados:</h4>
+        <ul id="listaEmpleados"></ul>
+
+        <h4>Logs de Auditoría:</h4>
+        <div class="log-actions">
+          <button onclick="verLogs()" aria-label="Ver logs de auditoría" title="Ver logs de auditoría">Ver Logs</button>
+          <button onclick="limpiarLogs()" aria-label="Limpiar logs de auditoría" title="Limpiar logs de auditoría" class="oculto">Limpiar Logs</button>
+        </div>
+        <div id="logsViewer"></div>
     </div>
-    <div>
-      <label for="filtroArea">Area:</label>
-      <select id="filtroArea" onchange="mostrarRegistros()">
-        <option value="">Todos</option>
-      </select>
+
+    <div id="editarRegistroModal">
+      <div class="modal-content">
+        <h3 id="modalTituloEdicion"></h3>
+        <div id="campoFechaHoraWrapper">
+          <label for="nuevaFechaHoraInput" class="label-entradaSalida">Nueva Fecha y Hora:</label>
+          <input type="datetime-local" id="nuevaFechaHoraInput" oninput="habilitarAceptarEdicion()">
+        </div>
+        <div class="modal-buttons">
+          <button id="btnAceptarEdicion" onclick="aceptarEdicion()" aria-label="Aceptar edición" title="Aceptar edición">Aceptar</button>
+          <button onclick="cancelarEdicion()" aria-label="Cancelar edición" title="Cancelar edición">Cancelar</button>
+        </div>
+      </div>
     </div>
-    </div>
-    <div class="filters-grid2">
-    <div>
-      <label for="filtroDesde">Desde:</label>
-      <input type="date" id="filtroDesde" onchange="mostrarRegistros()">
-    </div>
-    <div>
-      <label for="filtroHasta">Hasta:</label>
-      <input type="date" id="filtroHasta" onchange="mostrarRegistros()">
+
+    </div> <!--Control Horaio Div Fin-->
+ 
+  <div id="libroNovedadesSection" class="hidden">
+  <!--Boton Flotante--> 
+  <button class="boton-flotante control-horario-btn" id="controlHorarioBtn" aria-label="Control Horario" title="Control Horario">
+      <svg width="56" height="52" viewBox="0 0 76 76" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#000" fill-opacity="1" stroke-width="0.2" stroke-linejoin="round" d="M 38,23.75C 46.7445,23.75 53.8333,30.8388 53.8333,39.5833C 53.8333,48.3278 46.7445,55.4167 38,55.4167C 29.2555,55.4167 22.1667,48.3278 22.1667,39.5833C 22.1667,30.8388 29.2555,23.75 38,23.75 Z M 38,27.7083C 31.4416,27.7083 26.125,33.025 26.125,39.5833C 26.125,46.1417 31.4416,51.4583 38,51.4583C 44.5584,51.4583 49.875,46.1417 49.875,39.5833C 49.875,33.025 44.5584,27.7083 38,27.7083 Z M 37.6042,30.875C 38.4786,30.875 39.1875,31.5839 39.1875,32.4583L 39.1875,38.3959L 45.125,38.3959C 45.9994,38.3959 46.7083,39.1047 46.7083,39.9792L 46.7083,40.7708C 46.7083,41.6453 45.9994,42.3542 45.125,42.3542L 38,42.3542C 37.2083,42.2222 36.4167,42.0903 35.9548,41.6285C 35.493,41.1667 35.3611,40.375 35.2292,39.5833L 35.2292,32.4583C 35.2292,31.5839 35.938,30.875 36.8125,30.875L 37.6042,30.875 Z M 49.0833,20.5833C 52.5811,20.5833 55.4167,23.4189 55.4167,26.9167C 55.4167,28.4256 54.889,29.8113 54.008,30.8993C 51.9429,27.1006 48.5651,24.1189 44.4835,22.5632C 45.6379,21.3439 47.2718,20.5833 49.0833,20.5833 Z M 26.9167,20.5834C 28.7282,20.5834 30.3621,21.3439 31.5165,22.5632C 27.4349,24.1189 24.0571,27.1006 21.992,30.8993C 21.111,29.8113 20.5833,28.4256 20.5833,26.9167C 20.5833,23.4189 23.4189,20.5834 26.9167,20.5834 Z"/>
+      </svg>
+  </button>
     
-    </div>
-    </div>
-  </div>
-  <!-- Ejemplo para botones de filtros y exportación -->
-  <div class="filter-actions">
-    <button onclick="limpiarFiltros()" id="limpiarFiltrosBtn" aria-label="Limpiar filtros" title="Limpiar filtros">Limpiar Filtros</button>
-    <button onclick="exportarCSV()" id="exportarCSVBtn" aria-label="Exportar registros a CSV" title="Exportar registros a CSV">Exportar a CSV</button>
-  </div>
-</div>
-  <div id="table-container" class="table-responsive">
-    <table id="registrosTabla" class="table table-hover table-striped table-bordered align-middle">
-        <thead>
-          <tr>
-            <th class="min-width-120">Area</th>
-            <th class="min-width-150">Nombre</th>
-            <th class="min-width-120">Cargo</th>
-            <th class="min-width-140">Entrada</th>
-            <th class="min-width-140">Salida</th>
-            <th class="min-width-100">Acciones</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-  </div>
-
-  <div id="adminPanel" class="admin-panel">
-    <div class="admin-header">
-      <h3>Administrar Empleados</h3>
-      <button class="close-button" onclick="toggleAdmin()">×</button>
-    </div>
-
-    <div class="admin-form-grid">
-      <div class="form-group">
-        <label for="adminId">ID:</label>
-        <input type="text" id="adminId" readonly>
+  <h2>Libro de Novedades - Espacio OX</h2>
+    
+    <div class="cabecera-turno" id="cabeceraTurno">
+      <div>
+      <strong>Folio:</strong> <span id="folioActual"></span>&nbsp;&nbsp;&nbsp;|
       </div>
-      <div class="form-group">
-        <label for="adminNombre">Nombre:</label>
-        <input type="text" id="adminNombre">
+      <div>
+      <strong>Fecha:</strong> <span id="fechaActual"></span>&nbsp;&nbsp;&nbsp;|
       </div>
-      <div class="form-group">
-        <label for="adminCargo">Cargo:</label>
-        <input type="text" id="adminCargo">
+      <div>
+      <strong>Turno:</strong> <span id="turnoActual"></span>&nbsp;&nbsp;&nbsp;|
       </div>
-      <div class="form-group">
-        <label for="adminArea">Area:</label>
-        <input type="text" id="adminArea">
+      <div>
+      <strong>Responsable:</strong> <span id="responsableActual"></span>
       </div>
     </div>
+    <section class="header">
+    <section class="main-actions btn-inicio-turno">
+    <button class="btn-report" id="abrirReportesBtn">Reportes</button>
+    <button class="btn-report" id="reportarTurnoBtn">Cierre Turno</button>
+    </section>
+    <section class="btn2">
+      <button id="abrirRegistroBtn">+</button>
+      <h3>Registro Novedades</h3>
+    </section>
+    </section>
+    <div class="table-responsive">
+        <table id="tabla-guardados" class="table table-hover table-striped table-bordered align-middle">
+          <thead>
+            <tr>
+              <th class="col-hora">Hora</th>
+              <th class="col-anotacion">Anotación</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    <section class="btn2">
+      <button id="abrirProveedorBtn">+</button>
+      <h3>Ingreso de Proveedores</h3>
+    </section>
 
-    <div class="admin-buttons">
-      <button class="admin-buttons2" onclick="nuevoEmpleado()" aria-label="Nuevo empleado" title="Nuevo empleado">Crear Nuevo</button>
-      <button class="admin-buttons2" onclick="guardarEmpleado()" aria-label="Guardar o actualizar empleado" title="Guardar o actualizar empleado">Guardar/Actualizar</button>
-      <button class="admin-buttons2" onclick="eliminarEmpleado()" aria-label="Eliminar empleado" title="Eliminar empleado">Eliminar</button>
-      <button class="cancel-button" onclick="toggleAdmin()" aria-label="Cancelar y cerrar panel" title="Cancelar y cerrar panel">Cancelar</button>
+      <div class="table-responsive">
+        <table id="tabla-proveedores" class="table table-hover table-striped table-bordered align-middle">
+          <thead>
+            <tr>
+              <th class="col-hora">Hora</th>
+              <th class="col-patente">Patente</th>
+              <th class="col-conductor">Conductor</th>
+              <th class="col-acompanantes">+ PAX</th>
+              <th class="col-empresa">Empresa</th>
+              <th class="col-motivo">Motivo</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+        <!-- Modal Reportes de Turno -->
+
+    <div class="modal" id="modalReportes">
+      <div class="modal-content">
+        <button class="modal-close" type="button" aria-label="Cerrar" onclick="cerrarModalReportes()">×</button>
+        <h4>Reportes de Turno</h4>
+        <div id="listadoReportes"></div>
+      </div>
     </div>
 
-    <h4>Lista actual de empleados:</h4>
-    <ul id="listaEmpleados"></ul>
+        <!-- Modal de Inicio de Turno -->
 
-    <h4>Logs de Auditoría:</h4>
-    <div class="log-actions">
-      <button onclick="verLogs()" aria-label="Ver logs de auditoría" title="Ver logs de auditoría">Ver Logs</button>
-      <button onclick="limpiarLogs()" aria-label="Limpiar logs de auditoría" title="Limpiar logs de auditoría" class="oculto">Limpiar Logs</button>
+    <div class="modal" id="modalInicioTurno">
+      <div class="modal-content">
+        <button class="modal-close" type="button" aria-label="Cerrar" onclick="document.getElementById('modalInicioTurno').style.display='none'">×</button>
+        <h3>Iniciar Turno</h3>
+        <div class="form-grid">
+          <div>
+            <label>Folio:</label>
+            <input type="text" id="folioTurno" readonly title="Folio del turno" placeholder="Folio del turno">
+          </div>
+          <div>
+            <label>Fecha:</label>
+            <input type="date" id="fechaInicioTurno" readonly title="Fecha de inicio de turno" placeholder="Seleccione la fecha">
+          </div>
+          <div>
+            <label>Turno:</label>
+            <select id="turnoInicioTurno" title="Seleccione el turno">
+              <option value="" selected disabled>Seleccione el turno</option>
+              <option value="Día">Día</option>
+              <option value="Noche">Noche</option>
+            </select>
+          </div>
+          <div>
+            <label>Responsable:</label>
+            <select id="responsableInicioTurno" title="Seleccione el responsable">
+              <option value="" selected disabled>Seleccione el responsable</option>
+            </select>
+          </div>
+        </div>
+        <button id="btnIniciarTurno">Iniciar Turno</button>
+      </div>
     </div>
-    <div id="logsViewer"></div>
-  </div>
+
+  </div> <!--Libro de Novedades Div Fin-->
+
   
-  <div id="editarRegistroModal">
-  <div class="modal-content">
-    <h3 id="modalTituloEdicion"></h3>
-    <div id="campoFechaHoraWrapper">
-      <label for="nuevaFechaHoraInput" class="label-entradaSalida">Nueva Fecha y Hora:</label>
-      <input type="datetime-local" id="nuevaFechaHoraInput" oninput="habilitarAceptarEdicion()">
-    </div>
-    <div class="modal-buttons">
-      <button id="btnAceptarEdicion" onclick="aceptarEdicion()" aria-label="Aceptar edición" title="Aceptar edición">Aceptar</button>
-      <button onclick="cancelarEdicion()" aria-label="Cancelar edición" title="Cancelar edición">Cancelar</button>
-    </div>
-  </div>
-</div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <!-- Bootstrap 5 JS Bundle (con Popper) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
-  <script src="utils.js"></script>
-  <script src="app.js"></script>
-
-  <script>
-    
-  document.addEventListener('DOMContentLoaded', function() {
-    
-    // Inicializar dark mode si está habilitado
-    if (localStorage.getItem('darkMode') === 'true') {
-    document.body.classList.add('dark-mode');
-  }
-    // Botón Libro de Novedades
-    const libroBtn = document.getElementById('libroNovedadesBtn');
-    if (libroBtn) {
-      libroBtn.addEventListener('click', function() {
-        window.location.href = 'libro-novedades.html';
-      });
-    }
-
-    // Botón Modo Oscuro
-    const darkBtn = document.getElementById('toggleDarkMode');
-    if (darkBtn) {
-      darkBtn.addEventListener('click', toggleDarkMode);
-    }
-
-    // Botón Administrador
-    const adminBtn = document.getElementById('adminBtn');
-    if (adminBtn) {
-      adminBtn.addEventListener('click', toggleAdmin);
-    }
-
-    // Botón Entrada
-    const entradaBtn = document.getElementById('entradaBtn');
-    if (entradaBtn) {
-      entradaBtn.addEventListener('click', function() {
-        registrar('entrada');
-      });
-    }
-
-    // Botón Salida
-    const salidaBtn = document.getElementById('salidaBtn');
-    if (salidaBtn) {
-      salidaBtn.addEventListener('click', function() {
-        registrar('salida');
-      });
-    }
-
-    // Botón Limpiar Búsqueda
-    const clearSearchBtn = document.getElementById('clearSearchBtn');
-    if (clearSearchBtn) {
-      clearSearchBtn.addEventListener('click', limpiarBusquedaEmpleado);
-    }
-
-    // Botón Limpiar Filtros
-    const limpiarFiltrosBtn = document.getElementById('limpiarFiltrosBtn');
-    if (limpiarFiltrosBtn) {
-      limpiarFiltrosBtn.addEventListener('click', limpiarFiltros);
-    }
-
-    // Botón Exportar CSV
-    const exportarCSVBtn = document.getElementById('exportarCSVBtn');
-    if (exportarCSVBtn) {
-      exportarCSVBtn.addEventListener('click', exportarCSV);
-    }
-  });
-
-  document.getElementById('busquedaEmpleado').addEventListener('search', function (e) {
-    if (this.value === '') {
-      limpiarBusquedaEmpleado();
-    }
-  });
-</script>
-
-<!-- Botón Volver 
-<input type="file" id="fileInput" accept=".json" />
-<button onclick="importarConReset()">Importar y Reemplazar localStorage</button>
-
-<script>
-function importarConReset() {
-  const input = document.getElementById("fileInput");
-
-  if (!input.files.length) {
-    alert("Primero selecciona un archivo JSON.");
-    return;
-  }
-
-  const confirmacion = confirm("⚠️ Esto borrará todo el localStorage actual. ¿Estás seguro?");
-  if (!confirmacion) {
-    alert("Operación cancelada.");
-    return;
-  }
-
-  const file = input.files[0];
-  const reader = new FileReader();
-
-  reader.onload = function(event) {
-    try {
-      const data = JSON.parse(event.target.result);
-
-      // 1. Borrar localStorage actual
-      localStorage.clear();
-
-      // 2. Importar nuevo contenido
-      let count = 0;
-      for (const key in data) {
-        localStorage.setItem(key, data[key]);
-        count++;
-      }
-
-      alert(`✅ Importación completa. Se cargaron ${count} claves nuevas.`);
-    } catch (err) {
-      alert("❌ Error al importar: archivo no válido o corrupto.");
-      console.error(err);
-    }
-  };
-
-  reader.readAsText(file);
-}
-</script>
--->
-<footer>
+   <footer>
     <p>© Zer0x App 2025</p>
-</footer>
+   </footer>
+
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+ <script src="utils.js"></script>
+ <script src="app.js"></script>
+ <script src="libro-novedades.js"></script>
+ 
+<script>
+  
+    document.addEventListener('DOMContentLoaded', function () {
+    const controlHorarioSection = document.getElementById('controlHorarioSection');
+    const libroNovedadesSection = document.getElementById('libroNovedadesSection');
+    const libroNovedadesBtn = document.getElementById('libroNovedadesBtn');
+    const controlHorarioBtn = document.getElementById('controlHorarioBtn');
+    
+    
+    libroNovedadesBtn.addEventListener('click', showLibroNovedades);
+    controlHorarioBtn.addEventListener('click', showControlHorario);
+    
+    showControlHorario();
+
+    // Dark Mode
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.body.classList.add('dark-mode');
+    }
+
+    const darkBtn = document.getElementById('toggleDarkMode');
+    darkBtn?.addEventListener('click', toggleDarkMode);
+
+    document.getElementById('adminBtn')?.addEventListener('click', toggleAdmin);
+    document.getElementById('entradaBtn')?.addEventListener('click', () => registrar('entrada'));
+    document.getElementById('salidaBtn')?.addEventListener('click', () => registrar('salida'));
+    document.getElementById('busquedaEmpleado')?.addEventListener('search', function () {
+      if (this.value === '') limpiarBusquedaEmpleado();
+    });
+    document.getElementById('limpiarFiltrosBtn')?.addEventListener('click', limpiarFiltros);
+    document.getElementById('exportarCSVBtn')?.addEventListener('click', exportarCSV);
+  });
+
+</script>
+
 </body>
 </html>

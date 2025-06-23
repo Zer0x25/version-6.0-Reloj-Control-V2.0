@@ -1,19 +1,7 @@
 const LS_NOVEDADES = "libro-novedades-registros";
 const LS_PROVEEDORES = "libro-novedades-proveedores";
-// --- NUEVA LÓGICA DE LIBRO DE NOVEDADES DIGITAL ---
-
 const LS_TURNOS_CERRADOS = "libro-novedades-turnos-cerrados";
 const LS_TURNO_ABIERTO = "libro-novedades-turno-abierto";
-
-// Corrige la asignación de la fecha para evitar desfase por zona horaria
-function obtenerFechaHoy() {
-  // Devuelve la fecha local en formato YYYY-MM-DD
-  const hoy = new Date();
-  const year = hoy.getFullYear();
-  const month = (hoy.getMonth() + 1).toString().padStart(2, '0');
-  const day = hoy.getDate().toString().padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
 
 try {
   document.getElementById("fecha").value = obtenerFechaHoy();
@@ -154,29 +142,6 @@ function cargarResponsablesRelojControl() {
   });
 }
 
-document.getElementById('btnIniciarTurno').addEventListener('click', function() {
-  const folio = document.getElementById('folioTurno').value;
-  const fecha = document.getElementById('fechaInicioTurno').value;
-  const turno = document.getElementById('turnoInicioTurno').value;
-  const responsable = document.getElementById('responsableInicioTurno').value;
-  if (!folio || !fecha || !turno || !responsable) {
-    sweetAlertError('Debe completar todos los campos para iniciar el turno.');
-    return;
-  }
-  const turnoAbierto = { folio, fecha, turno, responsable };
-  guardarEnLS(LS_TURNO_ABIERTO, turnoAbierto);
-  document.getElementById('modalInicioTurno').style.display = 'none';
-  mostrarCabeceraTurno(turnoAbierto);
-  bloquearCabeceraTurno();
-  // Agregar registro automático de inicio de turno
-  const ahora = new Date();
-  const hora = ahora.getHours().toString().padStart(2, '0') + ':' + ahora.getMinutes().toString().padStart(2, '0');
-  let registros = obtenerDeLS(LS_NOVEDADES) || [];
-  registros.push({ hora, nota: 'Inicio de Turno y lectura de Novedades anteriores' });
-  guardarEnLS(LS_NOVEDADES, registros);
-  agregarRegistroATabla(hora, 'Inicio de Turno y lectura de Novedades anteriores');
-});
-
 function mostrarCabeceraTurno(turno) {
   document.getElementById('cabeceraTurno').style.display = '';
   document.getElementById('folioActual').textContent = turno.folio;
@@ -246,8 +211,9 @@ function reportarTurno() {
   eliminarDeLS(LS_TURNO_ABIERTO);
   eliminarDeLS(LS_NOVEDADES);
   eliminarDeLS(LS_PROVEEDORES);
-  mostrarNotificacionTurnoCerrado('El turno ha sido reportado y cerrado correctamente.', function() {
-    window.location.href = 'index.html';
+  mostrarNotificacionTurnoCerrado('El turno ha sido reportado y cerrado correctamente.', function () {
+ document.getElementById('libroNovedadesSection').style.display = 'none';
+    document.getElementById('controlHorarioSection').style.display = 'block';
   });
 }
 // Reemplazar el handler del botón reportar turno
@@ -298,7 +264,6 @@ function agregarFilaATabla(tablaId, valores) {
   tbody.appendChild(fila);
 }
 
-// --- MODALES ---
 function cerrarModal() {
   cerrarYLimpiarModal("modal", ["inputHora", "inputNota"]);
 }
@@ -389,27 +354,14 @@ function mostrarDetalleReporte(folio) {
 
 // Delegar el cierre del modal de reportes para la X dinámica
 (function() {
-  document.addEventListener('DOMContentLoaded', function() {
-    const listado = document.getElementById('listadoReportes');
-    if (listado) {
-      listado.addEventListener('click', function(e) {
-        if (e.target && e.target.classList.contains('modal-close')) {
-          cerrarModalReportes();
-        }
-      });
-    }
-  });
 })();
 
 document.addEventListener("DOMContentLoaded", function() {
   // Repoblar tablas aquí
   const registros = obtenerDeLS(LS_NOVEDADES) || [];
   registros.forEach(r => agregarRegistroATabla(r.hora, r.nota));
-
   const proveedores = obtenerDeLS(LS_PROVEEDORES) || [];
-  proveedores.forEach(p => {
-    agregarProveedorATabla(p.hora, p.patente, p.conductor, p.acompanantes, p.empresa, p.motivo);
-  });
+ proveedores.forEach(p => agregarProveedorATabla(p.hora, p.patente, p.conductor, p.acompanantes, p.empresa, p.motivo));
 
   inicializarLibroNovedades();
 
@@ -417,8 +369,6 @@ document.addEventListener("DOMContentLoaded", function() {
   if (abrirReportesBtn) {
     abrirReportesBtn.addEventListener('click', abrirModalReportes);
   }
-  // Forzar volver a index si se cierra el modal de inicio de turno sin iniciar
-  forzarRedireccionCerrarModalInicioTurno();
 });
 
 function cerrarModalReportes() {
@@ -431,32 +381,53 @@ function turnoEstaAbierto() {
   return !!obtenerDeLS(LS_TURNO_ABIERTO);
 }
 
-// Forzar volver a index si se cierra el modal de inicio de turno sin iniciar
-function forzarRedireccionCerrarModalInicioTurno() {
-  const modalInicio = document.getElementById('modalInicioTurno');
-  if (!modalInicio) return;
-  // Cierre por X
-  modalInicio.querySelectorAll('.modal-close').forEach(btn => {
-    btn.onclick = function() {
-      window.location.href = 'index.html';
-    };
-  });
-  // Cierre por click fuera del modal-content
-  modalInicio.addEventListener('mousedown', function(e) {
-    if (e.target === modalInicio) {
-      window.location.href = 'index.html';
-    }
-  });
-  // Cierre por tecla ESC
-  document.addEventListener('keydown', function(e) {
-    if (modalInicio.style.display === 'flex' && (e.key === 'Escape' || e.key === 'Esc')) {
-      window.location.href = 'index.html';
-    }
-  });
-}
 
-document.addEventListener('DOMContentLoaded', function() {
-  forzarRedireccionCerrarModalInicioTurno();
+document.getElementById('btnIniciarTurno').addEventListener('click', function() {
+  // Lógica para iniciar turno
+  const folio = document.getElementById('folioTurno').value;
+  const fecha = document.getElementById('fechaInicioTurno').value;
+  const turno = document.getElementById('turnoInicioTurno').value;
+  const responsable = document.getElementById('responsableInicioTurno').value;
+  if (!folio || !fecha || !turno || !responsable) {
+    sweetAlertError('Debe completar todos los campos para iniciar el turno.');
+    return;
+  }
+  const turnoAbierto = { folio, fecha, turno, responsable };
+  guardarEnLS(LS_TURNO_ABIERTO, turnoAbierto);
+  document.getElementById('modalInicioTurno').style.display = 'none';
+  mostrarCabeceraTurno(turnoAbierto);
+  bloquearCabeceraTurno();
+  // Agregar registro automático de inicio de turno
+  const ahora = new Date();
+  const hora = ahora.getHours().toString().padStart(2, '0') + ':' + ahora.getMinutes().toString().padStart(2, '0');
+  let registros = obtenerDeLS(LS_NOVEDADES) || [];
+  registros.push({ hora, nota: 'Inicio de Turno y lectura de Novedades anteriores' });
+  guardarEnLS(LS_NOVEDADES, registros);
+  agregarRegistroATabla(hora, 'Inicio de Turno y lectura de Novedades anteriores');
+
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+  const abrirRegistroBtn = document.getElementById('abrirRegistroBtn');
+  if (abrirRegistroBtn) {
+    abrirRegistroBtn.addEventListener('click', abrirModalRegistroSweet);
+  }
+  const abrirProveedorBtn = document.getElementById('abrirProveedorBtn');
+  if (abrirProveedorBtn) {
+    abrirProveedorBtn.addEventListener('click', abrirModalProveedorSweet);
+  }
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const textareas = document.querySelectorAll('.campo-textarea');
+
+  textareas.forEach(textarea => {
+    textarea.addEventListener('input', function () {
+      this.style.height = 'auto'; // Reinicia altura si borras texto
+      const altura = Math.min(this.scrollHeight, 120); // Máximo 120px
+      this.style.height = altura + 'px';
+    });
+  });
 });
 
 const formularioHTML = `
@@ -476,7 +447,9 @@ const formularioHTML = `
 
 async function abrirModalRegistroSweet() {
   if (!turnoEstaAbierto()) {
-    window.location.href = 'index.html';
+ sweetAlertError('Debe iniciar un turno para agregar registros.');
+ document.getElementById('libroNovedadesSection').style.display = 'none';
+    document.getElementById('controlHorarioSection').style.display = 'block';
     return;
   }
   const { value: formValues } = await Swal.fire({
@@ -551,7 +524,9 @@ const proveedorHTML = `
 
 async function abrirModalProveedorSweet() {
   if (!turnoEstaAbierto()) {
-    window.location.href = 'index.html';
+ sweetAlertError('Debe iniciar un turno para agregar proveedores.');
+ document.getElementById('libroNovedadesSection').style.display = 'none';
+    document.getElementById('controlHorarioSection').style.display = 'block';
     return;
   }
   const { value: formValues } = await Swal.fire({
@@ -621,29 +596,6 @@ async function abrirModalProveedorSweet() {
     Swal.fire('Proveedor guardado', '', 'success');
   }
 }
-
-document.addEventListener("DOMContentLoaded", function() {
-  const abrirRegistroBtn = document.getElementById('abrirRegistroBtn');
-  if (abrirRegistroBtn) {
-    abrirRegistroBtn.addEventListener('click', abrirModalRegistroSweet);
-  }
-  const abrirProveedorBtn = document.getElementById('abrirProveedorBtn');
-  if (abrirProveedorBtn) {
-    abrirProveedorBtn.addEventListener('click', abrirModalProveedorSweet);
-  }
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-  const textareas = document.querySelectorAll('.campo-textarea');
-
-  textareas.forEach(textarea => {
-    textarea.addEventListener('input', function () {
-      this.style.height = 'auto'; // Reinicia altura si borras texto
-      const altura = Math.min(this.scrollHeight, 120); // Máximo 120px
-      this.style.height = altura + 'px';
-    });
-  });
-});
 
 // --- SCROLL AUTOMÁTICO Y CIERRE POR FONDO EN MODALES ---
 

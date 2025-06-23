@@ -602,6 +602,7 @@ function mostrarRegistros() {
             </button>
           </td>
         </tr>`;
+ // Aquí falta el cierre del botón de comentario y el div de los botones
     });
 
     aplicarEventosDblClickATabla();
@@ -609,6 +610,7 @@ function mostrarRegistros() {
   }
 
   // Filtro normal si hay algún filtro activo
+
   let filtrados = registros.filter(reg => {
     return (!nombreFiltro || reg.nombre.toLowerCase().includes(nombreFiltro))
       && (!areaFiltro || reg.area === areaFiltro)
@@ -717,8 +719,6 @@ function handleDblClickRegistro(event, tipoCampo) {
   modal.style.display = "flex"; // Mostrar el modal de edición
   // document.getElementById('editarRegistroModal').style.display = 'flex';
 }
-
-// Nueva función para aceptar la edición de fecha y hora completa
 
 async function aceptarEdicion() {
   const nuevaFechaHoraInput = document.getElementById("nuevaFechaHoraInput");
@@ -842,6 +842,7 @@ function agregarComentarioRegistro(uid) {
   });
 }
 // Habilitar scroll horizontal por arrastre en el contenedor de la tabla
+
 function habilitarArrastreScrollHorizontal(idContenedor) {
   const contenedor = document.getElementById(idContenedor);
   let isDown = false;
@@ -886,6 +887,28 @@ document.addEventListener("DOMContentLoaded", function() {
     actualizarFechaHora();
     cargarEmpleados();
     mostrarRegistros();
-    habilitarArrastreScrollHorizontal('table-container');
-  });
 
+    // Configurar botones de navegación
+
+    const controlHorarioBtn = document.getElementById('controlHorarioBtn');
+    const libroNovedadesBtn = document.getElementById('libroNovedadesBtn');
+    const controlHorarioSection = document.getElementById('controlHorarioSection');
+    const libroNovedadesSection = document.getElementById('libroNovedadesSection');
+
+    if (controlHorarioBtn && libroNovedadesBtn && controlHorarioSection && libroNovedadesSection) {
+        // Inicialmente mostrar la sección de Control Horario
+        controlHorarioSection.style.display = 'block';
+        libroNovedadesSection.style.display = 'none';
+
+        controlHorarioBtn.addEventListener('click', () => {
+        controlHorarioSection.style.display = 'block';
+        libroNovedadesSection.style.display = 'none';
+        });
+        libroNovedadesBtn.addEventListener('click', () => {
+        controlHorarioSection.style.display = 'none';
+        libroNovedadesSection.style.display = 'block';
+        });
+    }
+
+  habilitarArrastreScrollHorizontal('table-container'); 
+});
