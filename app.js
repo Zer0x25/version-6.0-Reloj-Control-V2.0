@@ -1,914 +1,853 @@
 // --- Variables Globales ---
-let empleadoSeleccionado = null;
-let empleadoActual = null;
-let registroEditando = null;
-let campoEditando = null;
+// Variables para mantener el estado de la aplicación
+let empleadoSeleccionado = null; // Almacena el empleado actualmente seleccionado en la búsqueda principal.
+let empleadoActual = null;       // Almacena el empleado cuyo registro se está gestionando (entrada/salida).
+let registroEditando = null;     // Almacena el objeto de registro que se está editando en el modal.
+let campoEditando = null;        // Almacena el nombre del campo que se está editando ('entrada' o 'salida').
 
-const ADMIN_PIN = "1234";
-const LS_EMPLEADOS = "empleados";
-const LS_REGISTROS = "registros";
-const LS_LOGS = "logs";
+// Constantes para claves de Local Storage y configuración de seguridad
+const ADMIN_PIN = "1234";      // PIN de acceso al panel de administración.
+const LS_EMPLEADOS = "empleados"; // Clave para almacenar la lista de empleados en Local Storage.
+const LS_REGISTROS = "registros"; // Clave para almacenar los registros de entrada/salida.
+const LS_LOGS = "logs";           // Clave para almacenar los logs de auditoría.
 
-// --- Funciones de Utilidad ---
+// --- Funciones de Utilidad (Centralizadas en utils.js, aquí solo las específicas de este módulo) ---
 
+/**
+ * Limpia el campo de búsqueda de empleados y resetea la selección actual.
+ */
 function limpiarBusquedaEmpleado() {
   document.getElementById("busquedaEmpleado").value = "";
   empleadoActual = null;
-}
-
-function crearFechaLocal(fecha, hora) {
-  const [anio, mes, dia] = fecha.split('-').map(Number);
-  const [h, m] = hora.split(':').map(Number);
-  return new Date(anio, mes - 1, dia, h, m, 0, 0);
-}
-
-function generarUID() {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+  // Opcional: También podrías limpiar la tabla de registros si no hay empleado seleccionado
+  // mostrarRegistros();
 }
 
 // --- Funciones de Logs y Exportación ---
 
-function guardarLog(accion, empleado) {
-  let logs = obtenerDeLS(LS_LOGS) || [];
-  logs.push({
-    fechaHora: new Date().toLocaleString('es-ES'),
-    accion,
-    empleado,
-    usuario: "admin"
-  });
-  guardarEnLS(LS_LOGS, logs);
+/**
+ * Guarda un registro de auditoría en Local Storage.
+ * @param {string} accion - La acción realizada (e.g., "Empleado creado", "Entrada registrada").
+ * @param {string} empleadoInfo - Información relevante sobre el empleado afectado (ej: nombre, ID).
+ */
+function guardarLog(accion, empleadoInfo) {
+  let logs = obtenerDeLS(LS_LOGS) || []; // Obtiene los logs existentes o un array vacío.
+  const timestamp = new Date().toLocaleString(); // Fecha y hora actual formateada.
+  logs.unshift({ timestamp, accion, empleadoInfo }); // Añade el nuevo log al principio.
+  guardarEnLS(LS_LOGS, logs); // Guarda la lista actualizada de logs.
 }
 
+/**
+ * Muestra los logs de auditoría en el visor dedicado.
+ * Alterna la visibilidad del botón "Limpiar Logs".
+ */
 function verLogs() {
-  const logs = obtenerDeLS(LS_LOGS) || [];
-  const viewer = document.getElementById("logsViewer");
-  viewer.innerHTML = "";
+  const logsViewer = document.getElementById('logsViewer');
+  const limpiarLogsBtn = document.getElementById('limpiarLogsBtn');
+  let logs = obtenerDeLS(LS_LOGS) || [];
 
-  if (logs.length === 0) {
-    viewer.innerHTML = "<p><em>No hay logs registrados.</em></p>";
-    return;
+  // Alternar visibilidad
+  if (logsViewer.style.display === 'block') {
+    logsViewer.style.display = 'none';
+    limpiarLogsBtn.classList.add('oculto'); // Oculta el botón de limpiar
+  } else {
+    logsViewer.style.display = 'block';
+    limpiarLogsBtn.classList.remove('oculto'); // Muestra el botón de limpiar
+
+    if (logs.length === 0) {
+      logsViewer.textContent = "No hay logs disponibles.";
+      limpiarLogsBtn.classList.add('oculto'); // Oculta si no hay logs
+      return;
+    }
+
+    // Formatear logs para visualización
+    logsViewer.innerHTML = logs.map(log =>
+      `<p><strong>${log.timestamp}</strong>: ${log.accion} - ${log.empleadoInfo}</p>`
+    ).join('');
   }
-
-  logs.slice().reverse().forEach(log => {
-    const div = document.createElement("div");
-    div.classList.add('log-entry');
-    div.innerHTML = `<strong>${log.fechaHora}</strong> — ${log.accion} — ${log.empleado}`;
-    viewer.appendChild(div);
-  });
 }
 
-async function limpiarLogs() {
-  const { value: confirmar } = await Swal.fire({
+/**
+ * Limpia todos los logs de auditoría del Local Storage y del visor.
+ */
+function limpiarLogs() {
+  Swal.fire({
     title: '¿Estás seguro?',
-    text: "¡Esta acción eliminará permanentemente todos los logs de auditoría!",
+    text: "¡No podrás revertir esto!",
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Sí, limpiar',
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Sí, borrar logs',
     cancelButtonText: 'Cancelar'
-  });
-
-  if (!confirmar) return;
-
-  eliminarDeLS(LS_LOGS);
-  verLogs();
-  Swal.fire({
-    icon: 'success',
-    title: 'Logs Limpiados',
-    text: 'Todos los logs han sido eliminados.',
-    showConfirmButton: false,
-    timer: 1500
+  }).then((result) => {
+    if (result.isConfirmed) {
+      eliminarDeLS(LS_LOGS); // Elimina la clave de logs del Local Storage.
+      document.getElementById('logsViewer').textContent = "Logs limpiados.";
+      document.getElementById('limpiarLogsBtn').classList.add('oculto'); // Oculta el botón
+      sweetAlertError('Logs de auditoría limpiados.', 'success', 'Limpieza completa');
+    }
   });
 }
 
-function exportarCSV() {
-  const registros = obtenerDeLS(LS_REGISTROS) || [];
+/**
+ * Muestra los registros de entrada y salida en la tabla principal, aplicando filtros.
+ * Se encarga de construir dinámicamente las filas de la tabla.
+ */
+function mostrarRegistros() {
+  const tablaBody = document.querySelector("#registrosTabla tbody");
+  if (!tablaBody) return; // Asegurarse de que la tabla exista
 
-  const nombreFiltro = document.getElementById("filtroNombre").value.toLowerCase();
-  const areaFiltro = document.getElementById("filtroArea").value;
-  const desde = document.getElementById("filtroDesde").value;
-  const hasta = document.getElementById("filtroHasta").value;
+  tablaBody.innerHTML = ""; // Limpiar tabla antes de añadir nuevos registros.
 
-  const filtrados = registros.filter(reg => {
-    return (!nombreFiltro || reg.nombre.toLowerCase().includes(nombreFiltro))
-      && (!areaFiltro || reg.area === areaFiltro)
-      && (!desde || reg.entradaCompleta >= `${desde} 00:00`)
-      && (!hasta || reg.entradaCompleta <= `${hasta} 23:59`);
+  let registros = obtenerDeLS(LS_REGISTROS) || [];
+  const empleados = obtenerDeLS(LS_EMPLEADOS) || [];
+
+  const filtroNombre = document.getElementById("filtroNombre")?.value.toLowerCase() || "";
+  const filtroArea = document.getElementById("filtroArea")?.value.toLowerCase() || "";
+  const filtroDesde = document.getElementById("filtroDesde")?.value;
+  const filtroHasta = document.getElementById("filtroHasta")?.value;
+
+  // Filtrar registros
+  const registrosFiltrados = registros.filter(registro => {
+    const empleado = empleados.find(emp => emp.id === registro.empleadoId);
+    if (!empleado) return false; // Si el empleado no existe, no mostrar el registro
+
+    const nombreCompleto = empleado.nombre.toLowerCase();
+    const areaEmpleado = empleado.area.toLowerCase();
+    const fechaRegistro = new Date(registro.fecha); // Convertir a objeto Date para comparación
+
+    let pasaFiltroNombre = true;
+    if (filtroNombre) {
+      pasaFiltroNombre = nombreCompleto.includes(filtroNombre);
+    }
+
+    let pasaFiltroArea = true;
+    if (filtroArea) {
+      pasaFiltroArea = areaEmpleado.includes(filtroArea);
+    }
+
+    let pasaFiltroDesde = true;
+    if (filtroDesde) {
+      const desdeDate = new Date(filtroDesde);
+      // Comparar solo la parte de la fecha
+      pasaFiltroDesde = fechaRegistro >= desdeDate;
+    }
+
+    let pasaFiltroHasta = true;
+    if (filtroHasta) {
+      const hastaDate = new Date(filtroHasta);
+      // Para incluir el día "hasta", se compara hasta el final de ese día
+      const endOfHastaDate = new Date(hastaDate);
+      endOfHastaDate.setHours(23, 59, 59, 999);
+      pasaFiltroHasta = fechaRegistro <= endOfHastaDate;
+    }
+
+    return pasaFiltroNombre && pasaFiltroArea && pasaFiltroDesde && pasaFiltroHasta;
   });
 
-  if (filtrados.length === 0) {
-    Swal.fire({
-      icon: 'info',
-      title: 'Sin Datos',
-      text: 'No hay registros que coincidan con los filtros para exportar.',
-      confirmButtonText: 'Ok'
+  // Ordenar registros: los más recientes primero
+  registrosFiltrados.sort((a, b) => new Date(b.fecha + 'T' + b.hora) - new Date(a.fecha + 'T' + a.hora));
+
+  // Renderizar registros en la tabla
+  registrosFiltrados.forEach(registro => {
+    const empleado = empleados.find(emp => emp.id === registro.empleadoId);
+    if (!empleado) return; // Doble chequeo, aunque el filtro ya lo haría
+
+    const row = tablaBody.insertRow();
+    row.dataset.uid = registro.uid; // Asignar UID como data-attribute para fácil referencia
+    row.innerHTML = `
+      <td class="editable" data-field="area" data-uid="${registro.uid}">${empleado.area || ''}</td>
+      <td class="editable" data-field="nombre" data-uid="${registro.uid}">${empleado.nombre}</td>
+      <td class="editable" data-field="cargo" data-uid="${registro.uid}">${empleado.cargo || ''}</td>
+      <td class="editable" data-field="entrada" data-uid="${registro.uid}">${registro.entrada ? registro.fecha + ' ' + registro.entrada : 'N/A'}</td>
+      <td class="editable" data-field="salida" data-uid="${registro.uid}">${registro.salida ? registro.fecha + ' ' + registro.salida : 'Pendiente'}</td>
+      <td>
+        <button class="accion-registro" data-action="comentario" data-uid="${registro.uid}" aria-label="Agregar comentario" title="Agregar comentario">📝</button>
+        <button class="accion-registro" data-action="eliminar" data-uid="${registro.uid}" aria-label="Eliminar registro" title="Eliminar registro">🗑️</button>
+      </td>
+    `;
+  });
+}
+
+/**
+ * Popula el selector de áreas en el filtro de la tabla con las áreas existentes de los empleados.
+ */
+function popularFiltroArea() {
+  const filtroAreaSelect = document.getElementById("filtroArea");
+  if (!filtroAreaSelect) return;
+
+  const empleados = obtenerDeLS(LS_EMPLEADOS) || [];
+  const areas = new Set(); // Usar un Set para almacenar áreas únicas
+
+  empleados.forEach(empleado => {
+    if (empleado.area) {
+      areas.add(empleado.area);
+    }
+  });
+
+  // Limpiar opciones existentes, excepto "Todos"
+  filtroAreaSelect.innerHTML = '<option value="">Todos</option>';
+
+  // Añadir cada área única como una opción
+  areas.forEach(area => {
+    const option = document.createElement("option");
+    option.value = area.toLowerCase(); // Guardar en minúsculas para coincidencia de filtro
+    option.textContent = area;
+    filtroAreaSelect.appendChild(option);
+  });
+}
+
+/**
+ * Selecciona un empleado de la datalist y lo establece como empleadoActual.
+ * @param {string} nombreEmpleado - El nombre completo del empleado seleccionado.
+ */
+function seleccionarEmpleado(nombreEmpleado) {
+  const empleados = obtenerDeLS(LS_EMPLEADOS) || [];
+  empleadoActual = empleados.find(emp => emp.nombre.toLowerCase() === nombreEmpleado.toLowerCase());
+
+  if (empleadoActual) {
+    sweetAlertError(`Empleado seleccionado: ${empleadoActual.nombre}`, 'info', 'Info');
+  } else {
+    sweetAlertError('Empleado no encontrado. Por favor, seleccione uno de la lista.', 'error', 'Error');
+    limpiarBusquedaEmpleado();
+  }
+}
+
+/**
+ * Realiza la búsqueda de empleados y actualiza la datalist.
+ */
+function buscarEmpleado() {
+  const busquedaInput = document.getElementById("busquedaEmpleado");
+  const listaBusqueda = document.getElementById("listaBusqueda");
+  if (!busquedaInput || !listaBusqueda) return;
+
+  const searchTerm = busquedaInput.value.toLowerCase();
+  const empleados = obtenerDeLS(LS_EMPLEADOS) || [];
+
+  // Limpiar datalist
+  listaBusqueda.innerHTML = '';
+
+  if (searchTerm.length > 0) {
+    const empleadosFiltrados = empleados.filter(empleado =>
+      empleado.nombre.toLowerCase().includes(searchTerm)
+    );
+
+    empleadosFiltrados.forEach(empleado => {
+      const option = document.createElement('option');
+      option.value = empleado.nombre;
+      listaBusqueda.appendChild(option);
     });
+  }
+}
+
+
+/**
+ * Registra una entrada o salida para el empleado actual.
+ * @param {string} tipo - 'entrada' o 'salida'.
+ */
+function registrar(tipo) {
+  if (!empleadoActual) {
+    sweetAlertError('Por favor, primero seleccione un empleado.');
     return;
   }
 
-  const encabezados = ["ID", "Area", "Nombre", "Cargo", "Entrada", "Salida", "Horas Trabajadas"];
-  const filas = filtrados.map(r => {
-    let horas = "";
-    if (r.entradaCompleta && r.salidaCompleta) {
-      const entrada = new Date(r.entradaCompleta.replace(" ", "T"));
-      const salida = new Date(r.salidaCompleta.replace(" ", "T"));
-      horas = ((salida - entrada) / (1000 * 60 * 60)).toFixed(2);
+  let registros = obtenerDeLS(LS_REGISTROS) || [];
+  const fechaHoy = obtenerFechaHoy();
+  const horaActual = obtenerHoraActual();
+
+  // Buscar el último registro de entrada/salida para este empleado hoy
+  let ultimoRegistro = obtenerUltimoRegistro(registros, empleadoActual.id, fechaHoy);
+
+  if (tipo === 'entrada') {
+    if (ultimoRegistro && ultimoRegistro.entrada && !ultimoRegistro.salida) {
+      sweetAlertError(`¡${empleadoActual.nombre} ya tiene una entrada registrada hoy a las ${ultimoRegistro.entrada}!`);
+      return;
     }
-    return [
-      r.id,
-      r.area,
-      r.nombre,
-      r.cargo || "",
-      r.entradaCompleta || "",
-      r.salidaCompleta || "",
-      horas
-    ].join(",");
+
+    // Nuevo registro o un nuevo día o una nueva entrada después de una salida
+    const nuevoRegistro = {
+      uid: generarUID(), // Generar un UID único para el registro
+      empleadoId: empleadoActual.id,
+      fecha: fechaHoy,
+      entrada: horaActual,
+      salida: null, // La salida se establece en null inicialmente
+      comentario: ''
+    };
+    registros.push(nuevoRegistro);
+    guardarLog('Entrada registrada', `${empleadoActual.nombre} (${empleadoActual.id}) a las ${horaActual}`);
+    sweetAlertError(`¡Entrada de ${empleadoActual.nombre} registrada a las ${horaActual}!`, 'success');
+
+  } else if (tipo === 'salida') {
+    if (!ultimoRegistro || !ultimoRegistro.entrada) {
+      sweetAlertError(`¡${empleadoActual.nombre} no tiene una entrada registrada hoy para una salida!`);
+      return;
+    }
+    if (ultimoRegistro.salida) {
+      sweetAlertError(`¡${empleadoActual.nombre} ya registró su salida hoy a las ${ultimoRegistro.salida}!`);
+      return;
+    }
+
+    // Registrar salida en el último registro de entrada del día
+    ultimoRegistro.salida = horaActual;
+    // Actualizar el registro en el array
+    registros = registros.map(reg => reg.uid === ultimoRegistro.uid ? ultimoRegistro : reg);
+    guardarLog('Salida registrada', `${empleadoActual.nombre} (${empleadoActual.id}) a las ${horaActual}`);
+    sweetAlertError(`¡Salida de ${empleadoActual.nombre} registrada a las ${horaActual}!`, 'success');
+  }
+
+  guardarEnLS(LS_REGISTROS, registros);
+  mostrarRegistros(); // Actualizar la tabla
+  limpiarBusquedaEmpleado(); // Limpiar el campo de búsqueda
+}
+
+/**
+ * Busca el último registro de un empleado en una fecha específica.
+ * @param {Array} registros - Array de todos los registros.
+ * @param {string} empleadoId - ID del empleado.
+ * @param {string} fecha - Fecha en formato YYYY-MM-DD.
+ * @returns {Object|null} El último registro encontrado o null.
+ */
+function obtenerUltimoRegistro(registros, empleadoId, fecha) {
+  const registrosDelDia = registros.filter(reg => reg.empleadoId === empleadoId && reg.fecha === fecha);
+  if (registrosDelDia.length === 0) {
+    return null;
+  }
+  // Ordenar por hora de entrada para asegurarse de obtener el último si hay múltiples entradas/salidas en el día
+  registrosDelDia.sort((a, b) => {
+    const timeA = new Date(`2000/01/01 ${a.entrada}`);
+    const timeB = new Date(`2000/01/01 ${b.entrada}`);
+    return timeA - timeB;
+  });
+  return registrosDelDia[registrosDelDia.length - 1]; // Devuelve el registro más reciente del día
+}
+
+/**
+ * Agrega o edita un comentario en un registro existente.
+ * Utiliza SweetAlert2 para solicitar el comentario.
+ * @param {string} uid - El UID del registro a modificar.
+ */
+async function agregarComentarioRegistro(uid) {
+  let registros = obtenerDeLS(LS_REGISTROS) || [];
+  let registro = registros.find(reg => reg.uid === uid);
+
+  if (!registro) {
+    sweetAlertError('Registro no encontrado.');
+    return;
+  }
+
+  const { value: comentario } = await Swal.fire({
+    title: 'Agregar/Editar Comentario',
+    input: 'textarea',
+    inputLabel: `Comentario para el registro del ${registro.fecha} (${registro.entrada || ''} - ${registro.salida || ''}):`,
+    inputValue: registro.comentario || '',
+    showCancelButton: true,
+    confirmButtonText: 'Guardar',
+    cancelButtonText: 'Cancelar',
+    inputValidator: (value) => {
+      if (!value) {
+        return '¡Necesitas escribir un comentario!';
+      }
+    }
   });
 
-  const contenido = [encabezados.join(","), ...filas].join("\n");
+  if (comentario !== undefined) { // Si el usuario no canceló
+    registro.comentario = comentario;
+    guardarEnLS(LS_REGISTROS, registros.map(reg => reg.uid === uid ? registro : reg)); // Actualiza el registro
+    guardarLog('Comentario agregado/editado', `Registro ${uid} de ${registro.empleadoId}`);
+    sweetAlertError('Comentario guardado.', 'success', 'Éxito');
+    mostrarRegistros(); // Refrescar tabla
+  }
+}
 
-  const blob = new Blob([contenido], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `registros_asistencia_${obtenerFechaHoy()}.csv`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+/**
+ * Elimina un registro de la tabla y del Local Storage.
+ * @param {string} uid - El UID del registro a eliminar.
+ */
+function eliminarRegistroPorUID(uid) {
   Swal.fire({
-    icon: 'success',
-    title: 'Exportado',
-    text: 'Registros exportados a CSV.',
-    showConfirmButton: false,
-    timer: 1500
+    title: '¿Estás seguro?',
+    text: "¡No podrás revertir esto!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      let registros = obtenerDeLS(LS_REGISTROS) || [];
+      const registroEliminado = registros.find(reg => reg.uid === uid);
+      if (registroEliminado) {
+        registros = registros.filter(reg => reg.uid !== uid);
+        guardarEnLS(LS_REGISTROS, registros);
+        guardarLog('Registro eliminado', `Registro ${uid} de ${registroEliminado.empleadoId}`);
+        sweetAlertError('Registro eliminado exitosamente.', 'success', 'Eliminado');
+        mostrarRegistros(); // Refrescar tabla
+      } else {
+        sweetAlertError('Error: Registro no encontrado para eliminar.', 'error');
+      }
+    }
   });
 }
 
-function actualizarFechaHora() {
-  const contenedor = document.getElementById("fechaHoraActual");
-  const ahora = new Date();
-  const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  const opcionesHora = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
-  const fechaFormateada = ahora.toLocaleDateString('es-ES', opcionesFecha);
-  const horaFormateada = ahora.toLocaleTimeString('es-ES', opcionesHora);
-  contenedor.textContent = `${fechaFormateada}, ${horaFormateada}`;
+/**
+ * Maneja el doble clic en una celda de la tabla para editar un registro.
+ * Permite editar la fecha y hora de entrada o salida.
+ * @param {HTMLElement} tdElement - La celda (<td>) que fue doble-clicada.
+ */
+function handleDblClickRegistro(tdElement) {
+  const uid = tdElement.dataset.uid;
+  const field = tdElement.dataset.field; // 'entrada' o 'salida'
+
+  if (!uid || (field !== 'entrada' && field !== 'salida')) {
+    console.warn("Campo no editable o UID no encontrado.");
+    return;
+  }
+
+  let registros = obtenerDeLS(LS_REGISTROS) || [];
+  registroEditando = registros.find(reg => reg.uid === uid);
+
+  if (!registroEditando) {
+    sweetAlertError('Registro no encontrado para edición.');
+    return;
+  }
+
+  campoEditando = field; // Guardar el campo que se está editando globalmente
+
+  const modalTitulo = document.getElementById('modalTituloEdicion');
+  const nuevaFechaHoraInput = document.getElementById('nuevaFechaHoraInput');
+  const btnAceptarEdicion = document.getElementById('btnAceptarEdicion');
+
+  // Determinar el valor actual a mostrar en el input datetime-local
+  let currentValue = '';
+  if (registroEditando[field]) {
+    currentValue = `${registroEditando.fecha}T${registroEditando[field]}`;
+  } else {
+    // Si el campo está vacío (ej. salida pendiente), inicializar con fecha y hora actuales
+    currentValue = `${obtenerFechaHoy()}T${obtenerHoraActual()}`;
+  }
+
+  modalTitulo.textContent = `Editar ${field === 'entrada' ? 'Entrada' : 'Salida'}`;
+  nuevaFechaHoraInput.value = currentValue;
+  btnAceptarEdicion.disabled = false; // Habilitar el botón por defecto, la validación en oninput lo maneja
+
+  mostrarModalConScroll('editarRegistroModal');
 }
 
-// --- Funciones de Filtros ---
+/**
+ * Habilita o deshabilita el botón de aceptar edición basándose en la validez del input.
+ */
+function habilitarAceptarEdicion() {
+  const nuevaFechaHoraInput = document.getElementById('nuevaFechaHoraInput');
+  const btnAceptarEdicion = document.getElementById('btnAceptarEdicion');
+  // Simple validación: el campo no debe estar vacío.
+  btnAceptarEdicion.disabled = !nuevaFechaHoraInput.value;
+}
 
+/**
+ * Guarda los cambios realizados en el modal de edición de registro.
+ */
+function aceptarEdicion() {
+  if (!registroEditando || !campoEditando) {
+    sweetAlertError('Error interno: No hay registro o campo para editar.');
+    return;
+  }
+
+  const nuevaFechaHoraInput = document.getElementById('nuevaFechaHoraInput');
+  const newValue = nuevaFechaHoraInput.value; // Formato YYYY-MM-DDTHH:MM
+
+  if (!newValue) {
+    sweetAlertError('La fecha y hora no pueden estar vacías.');
+    return;
+  }
+
+  // Dividir la fecha y la hora
+  const [nuevaFecha, nuevaHora] = newValue.split('T');
+
+  // Actualizar el registro
+  let registros = obtenerDeLS(LS_REGISTROS) || [];
+  registros = registros.map(reg => {
+    if (reg.uid === registroEditando.uid) {
+      reg.fecha = nuevaFecha;
+      reg[campoEditando] = nuevaHora;
+      // Si se edita la entrada, y la salida era del mismo día, recalcular o limpiar salida si no tiene sentido
+      if (campoEditando === 'entrada' && reg.salida && reg.fecha !== nuevaFecha) {
+         // Opcional: Si la fecha de entrada cambia, y la salida estaba en el mismo día original,
+         // podrías optar por limpiar la salida o pedir confirmación al usuario.
+         // Por simplicidad, aquí solo se actualiza la fecha de entrada.
+      }
+    }
+    return reg;
+  });
+
+  guardarEnLS(LS_REGISTROS, registros);
+  guardarLog(`Registro ${campoEditando} editado`, `UID: ${registroEditando.uid}`);
+  sweetAlertError('Registro actualizado exitosamente.', 'success', 'Actualizado');
+  cancelarEdicion(); // Cerrar el modal
+  mostrarRegistros(); // Refrescar la tabla
+}
+
+/**
+ * Cancela la edición y cierra el modal de edición de registro.
+ */
+function cancelarEdicion() {
+  document.getElementById('editarRegistroModal').classList.remove('visible');
+  registroEditando = null;
+  campoEditando = null;
+}
+
+// --- Funciones del Panel de Administración ---
+
+/**
+ * Alterna la visibilidad del panel de administración.
+ * Solicita un PIN si el panel se va a abrir.
+ */
+async function toggleAdmin() {
+  const adminPanel = document.getElementById('adminPanel');
+  if (!adminPanel) return;
+
+  if (adminPanel.style.display === 'block') {
+    adminPanel.style.display = 'none';
+  } else {
+    const { value: pin } = await Swal.fire({
+      title: 'Acceso de Administrador',
+      input: 'password',
+      inputLabel: 'Ingrese el PIN de administrador:',
+      inputPlaceholder: 'PIN',
+      inputAttributes: {
+        maxlength: 10,
+        autocapitalize: 'off',
+        autocorrect: 'off'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Acceder',
+      cancelButtonText: 'Cancelar',
+      allowOutsideClick: false,
+      inputValidator: (value) => {
+        if (!value) {
+          return '¡Necesitas ingresar un PIN!';
+        }
+      }
+    });
+
+    if (pin === ADMIN_PIN) {
+      adminPanel.style.display = 'block';
+      cargarEmpleadosEnAdmin(); // Cargar la lista de empleados al abrir el panel
+      sweetAlertError('Acceso concedido.', 'success', 'Bienvenido');
+    } else if (pin !== undefined) { // Si el usuario ingresó algo pero no es el PIN correcto
+      sweetAlertError('PIN incorrecto.', 'error', 'Acceso denegado');
+    }
+  }
+}
+
+/**
+ * Carga y muestra la lista de empleados en el panel de administración.
+ */
+function cargarEmpleadosEnAdmin() {
+  const listaEmpleados = document.getElementById('listaEmpleados');
+  if (!listaEmpleados) return;
+
+  listaEmpleados.innerHTML = '';
+  const empleados = obtenerDeLS(LS_EMPLEADOS) || [];
+
+  if (empleados.length === 0) {
+    listaEmpleados.innerHTML = '<li style="text-align: center; color: #777;">No hay empleados registrados.</li>';
+    return;
+  }
+
+  empleados.forEach(empleado => {
+    const li = document.createElement('li');
+    li.textContent = `${empleado.nombre} (${empleado.area || 'N/A'}) - ${empleado.cargo || 'N/A'}`;
+    li.dataset.id = empleado.id; // Almacenar el ID en el dataset
+    li.addEventListener('click', () => seleccionarEmpleadoAdmin(empleado.id));
+    listaEmpleados.appendChild(li);
+  });
+}
+
+/**
+ * Rellena los campos del formulario de administración con los datos de un empleado seleccionado.
+ * @param {string} empleadoId - El ID del empleado a seleccionar.
+ */
+function seleccionarEmpleadoAdmin(empleadoId) {
+  const empleados = obtenerDeLS(LS_EMPLEADOS) || [];
+  empleadoSeleccionado = empleados.find(emp => emp.id === empleadoId);
+
+  if (empleadoSeleccionado) {
+    document.getElementById('adminId').value = empleadoSeleccionado.id;
+    document.getElementById('adminNombre').value = empleadoSeleccionado.nombre;
+    document.getElementById('adminCargo').value = empleadoSeleccionado.cargo || '';
+    document.getElementById('adminArea').value = empleadoSeleccionado.area || '';
+  }
+}
+
+/**
+ * Prepara el formulario de administración para añadir un nuevo empleado.
+ */
+function nuevoEmpleado() {
+  document.getElementById('adminId').value = generarUID(); // Generar un nuevo UID para el nuevo empleado
+  document.getElementById('adminNombre').value = '';
+  document.getElementById('adminCargo').value = '';
+  document.getElementById('adminArea').value = '';
+  empleadoSeleccionado = null; // Resetear el empleado seleccionado
+}
+
+/**
+ * Guarda (crea o actualiza) un empleado en el Local Storage.
+ */
+function guardarEmpleado() {
+  const id = document.getElementById('adminId').value;
+  const nombre = document.getElementById('adminNombre').value.trim();
+  const cargo = document.getElementById('adminCargo').value.trim();
+  const area = document.getElementById('adminArea').value.trim();
+
+  if (!nombre || !id) {
+    sweetAlertError('El nombre y el ID del empleado no pueden estar vacíos.');
+    return;
+  }
+
+  let empleados = obtenerDeLS(LS_EMPLEADOS) || [];
+
+  // Verificar si es un empleado existente o nuevo
+  const existeEmpleado = empleados.find(emp => emp.id === id);
+
+  if (existeEmpleado) {
+    // Actualizar empleado existente
+    existeEmpleado.nombre = nombre;
+    existeEmpleado.cargo = cargo;
+    existeEmpleado.area = area;
+    guardarLog('Empleado actualizado', `${nombre} (${id})`);
+    sweetAlertError('Empleado actualizado exitosamente.', 'success', 'Actualizado');
+  } else {
+    // Crear nuevo empleado
+    // Verificar que el ID generado no esté duplicado (aunque generarUID es robusto)
+    if (empleados.some(emp => emp.id === id)) {
+        sweetAlertError('Error: ID de empleado duplicado. Intente crear uno nuevo.', 'error');
+        return;
+    }
+    const nuevo = { id, nombre, cargo, area };
+    empleados.push(nuevo);
+    guardarLog('Empleado creado', `${nombre} (${id})`);
+    sweetAlertError('Nuevo empleado creado exitosamente.', 'success', 'Creado');
+  }
+
+  guardarEnLS(LS_EMPLEADOS, empleados);
+  cargarEmpleadosEnAdmin(); // Refrescar la lista de empleados
+  popularFiltroArea(); // Actualizar el filtro de áreas
+  mostrarRegistros(); // Refrescar la tabla de registros si es necesario
+  nuevoEmpleado(); // Limpiar el formulario para otra entrada
+}
+
+/**
+ * Elimina un empleado del Local Storage.
+ */
+function eliminarEmpleado() {
+  const id = document.getElementById('adminId').value;
+  if (!id) {
+    sweetAlertError('Seleccione un empleado para eliminar.');
+    return;
+  }
+
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: "¡Eliminará el empleado y todos sus registros! ¡No podrás revertir esto!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      let empleados = obtenerDeLS(LS_EMPLEADOS) || [];
+      const empleadoAEliminar = empleados.find(emp => emp.id === id);
+
+      if (empleadoAEliminar) {
+        // Eliminar empleado
+        empleados = empleados.filter(emp => emp.id !== id);
+        guardarEnLS(LS_EMPLEADOS, empleados);
+
+        // Eliminar todos los registros asociados a este empleado
+        let registros = obtenerDeLS(LS_REGISTROS) || [];
+        const registrosRestantes = registros.filter(reg => reg.empleadoId !== id);
+        if (registros.length !== registrosRestantes.length) {
+            guardarEnLS(LS_REGISTROS, registrosRestantes);
+            console.log(`Eliminados ${registros.length - registrosRestantes.length} registros del empleado ${id}.`);
+        }
+
+        guardarLog('Empleado eliminado', `${empleadoAEliminar.nombre} (${empleadoAEliminar.id})`);
+        sweetAlertError('Empleado y sus registros eliminados exitosamente.', 'success', 'Eliminado');
+        cargarEmpleadosEnAdmin();
+        popularFiltroArea();
+        mostrarRegistros(); // Refrescar la tabla
+        nuevoEmpleado(); // Limpiar el formulario
+      } else {
+        sweetAlertError('Empleado no encontrado.', 'error');
+      }
+    }
+  });
+}
+
+/**
+ * Limpia todos los filtros aplicados en la tabla de registros.
+ */
 function limpiarFiltros() {
   document.getElementById("filtroNombre").value = "";
   document.getElementById("filtroArea").value = "";
   document.getElementById("filtroDesde").value = "";
   document.getElementById("filtroHasta").value = "";
-  mostrarRegistros();
-  Swal.fire({
-    icon: 'info',
-    title: 'Filtros Limpiados',
-    text: 'Se han restablecido todos los filtros.',
-    showConfirmButton: false,
-    timer: 1000
-  });
+  mostrarRegistros(); // Volver a mostrar todos los registros
 }
 
-// --- Funciones de Empleados (Admin) ---
-
-function cargarEmpleados() {
-  const empleados = obtenerDeLS(LS_EMPLEADOS) || [];
-
-  const lista = document.getElementById("listaEmpleados");
-  lista.innerHTML = "";
-  empleados.forEach(emp => {
-    const li = document.createElement("li");
-    li.textContent = `${emp.id} - ${emp.nombre} (${emp.cargo || 'Sin Cargo'}, ${emp.area})`; // Mostrar cargo
-    li.onclick = () => {
-      document.getElementById("adminId").value = emp.id;
-      document.getElementById("adminNombre").value = emp.nombre;
-      document.getElementById("adminCargo").value = emp.cargo || ''; // Rellenar campo de cargo
-      document.getElementById("adminArea").value = emp.area;
-      document.querySelectorAll("#listaEmpleados li").forEach(l => l.classList.remove("selected"));
-      li.classList.add("selected");
-      empleadoSeleccionado = emp.id;
-    };
-    lista.appendChild(li);
-  });
-
-  const selectArea = document.getElementById("filtroArea");
-  const areas = [...new Set(empleados.map(e => e.area))];
-  selectArea.innerHTML = '<option value="">Todos</option>';
-  areas.sort().forEach(area => {
-    if (area) selectArea.innerHTML += `<option value="${area}">${area}</option>`;
-  });
-
-  // Rellena la datalist para la búsqueda principal
-  const datalist = document.getElementById("listaBusqueda");
-  datalist.innerHTML = "";
-  empleados.forEach(emp => {
-    const opt = document.createElement("option");
-    opt.value = `${emp.nombre} (${emp.id}) - ${emp.cargo || 'Sin Cargo'}`; // Incluir cargo en la sugerencia de búsqueda
-    datalist.appendChild(opt);
-  });
-}
-
-function limpiarFormularioEmpleado() {
-  document.getElementById("adminId").value = "";
-  document.getElementById("adminNombre").value = "";
-  document.getElementById("adminCargo").value = "";
-  document.getElementById("adminArea").value = "";
-  empleadoSeleccionado = null;
-  document.querySelectorAll("#listaEmpleados li").forEach(li => li.classList.remove("selected"));
-}
-
-async function guardarEmpleado() {
-  const id = document.getElementById("adminId").value.trim();
-  const nombre = document.getElementById("adminNombre").value.trim();
-  const cargo = document.getElementById("adminCargo").value.trim();
-  const area = document.getElementById("adminArea").value.trim();
-  if (!id || !nombre || !cargo || !area) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Campos Requeridos',
-      text: 'Todos los campos (ID, Nombre, Cargo, Area) son requeridos.',
-      confirmButtonText: 'Entendido'
-    });
-    return;
-  }
-
-  let empleados = obtenerDeLS(LS_EMPLEADOS) || [];
-  const existente = empleados.find(e => e.id === id);
-
-  let mensajeLog = "";
-  let accionSwal = "";
-
-  if (existente) {
-    // Si existe, actualiza
-    existente.nombre = nombre;
-    existente.cargo = cargo;
-    existente.area = area;
-    mensajeLog = "Empleado actualizado";
-    accionSwal = "actualizado";
-  } else {
-    // Si no existe, verifica duplicado antes de agregar
-    if (empleados.some(e => e.id === id)) {
-      Swal.fire({
-        icon: 'error',
-        title: 'ID Duplicado',
-        text: 'El ID ya existe. No se pueden crear empleados con ID duplicado.',
-        confirmButtonText: 'Ok'
-      });
-      return;
-    }
-    empleados.push({ id, nombre, cargo, area });
-    mensajeLog = "Empleado creado";
-    accionSwal = "creado";
-  }
-
-  guardarEnLS(LS_EMPLEADOS, empleados);
-  cargarEmpleados();
-  mostrarRegistros();
-  limpiarFormularioEmpleado();
-  guardarLog(mensajeLog, `${nombre} (ID ${id})`);
-  Swal.fire({
-    icon: 'success',
-    title: '¡Éxito!',
-    text: `Empleado ${accionSwal} correctamente.`,
-    showConfirmButton: false,
-    timer: 1500
-  });
-}
-
-async function eliminarEmpleado() {
-  const id = document.getElementById("adminId").value.trim();
-  if (!id) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'ID Requerido',
-      text: 'Por favor, selecciona un empleado o ingresa un ID para eliminar.',
-      confirmButtonText: 'Ok'
-    });
-    return;
-  }
-
-  const { value: confirmar } = await Swal.fire({
-    title: '¿Estás seguro?',
-    text: "¡Esta acción eliminará permanentemente al empleado y sus registros!",
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Sí, eliminar',
-    cancelButtonText: 'Cancelar'
-  });
-
-  if (!confirmar) return;
-
-  let empleados = obtenerDeLS(LS_EMPLEADOS) || [];
-  const empleadoAEliminar = empleados.find(e => e.id === id);
-
-  if (!empleadoAEliminar) {
-    Swal.fire({
-      icon: 'error',
-      title: 'No Encontrado',
-      text: 'Empleado no encontrado.',
-      confirmButtonText: 'Ok'
-    });
-    return;
-  }
-
-  let registros = obtenerDeLS(LS_REGISTROS) || [];
-  registros = registros.filter(r => r.id !== id);
-  guardarEnLS(LS_REGISTROS, registros);
-
-  empleados = empleados.filter(e => e.id !== id);
-  guardarEnLS(LS_EMPLEADOS, empleados);
-
-  guardarLog("Empleado eliminado", `${empleadoAEliminar.nombre} (ID ${id})`);
-  cargarEmpleados();
-  mostrarRegistros();
-  limpiarFormularioEmpleado();
-  Swal.fire({
-    icon: 'success',
-    title: '¡Eliminado!',
-    text: `El empleado ${empleadoAEliminar.nombre} ha sido eliminado.`,
-    showConfirmButton: false,
-    timer: 1500
-  });
-}
-
-function nuevoEmpleado() {
-  limpiarFormularioEmpleado();
-  // Obtener el siguiente ID progresivo y formatear con ceros a la izquierda
-  const empleados = obtenerDeLS(LS_EMPLEADOS) || [];
-  let maxId = 0;
-  empleados.forEach(e => {
-    const num = parseInt(e.id, 10);
-    if (!isNaN(num) && num > maxId) maxId = num;
-  });
-  const siguienteId = (maxId + 1).toString().padStart(3, '0');
-  document.getElementById("adminId").value = siguienteId;
-  if (window.Swal) {
-    Swal.fire({
-      icon: 'info',
-      title: 'ID Nuevo Creado',
-      text: 'Favor ingresa los datos restantes y confirma con Guardar',
-      confirmButtonText: 'OK'
-    });
-  } else {
-    alert('ID Nuevo Creado. Favor ingresa los datos restantes y confirma con Guardar');
-  }
-}
-// --- Lógica de Registro de Asistencia ---
-
-function seleccionarEmpleado() {
-  const busquedaInput = document.getElementById("busquedaEmpleado");
-  const valorBusqueda = busquedaInput.value;
-
-  const empleados = obtenerDeLS(LS_EMPLEADOS) || [];
-
-  // Busca el empleado que coincida con el formato "Nombre (ID)"
-  // Modificado para que la búsqueda también considere el cargo en la datalist
-  const emp = empleados.find(e => `${e.nombre} (${e.id}) - ${e.cargo}` === valorBusqueda || `${e.nombre} (${e.id})` === valorBusqueda);
-
-  empleadoActual = emp || null;
-}
-
-async function registrar(tipo) {
-  seleccionarEmpleado(); // Forzar selección según input antes de registrar
-  if (!empleadoActual) {
-    Swal.fire({ icon: 'warning', title: 'Seleccione un empleado', showConfirmButton: false, timer: 1500 });
-    limpiarBusquedaEmpleado();
-    return;
-  }
-
-  const { id, nombre, cargo, area } = empleadoActual;
-  const fecha = obtenerFechaHoy();
-  const hora = obtenerHoraActual();
-  const fechaHoraCompleta = `${fecha} ${hora}`;
-
-  let registros = obtenerDeLS(LS_REGISTROS) || [];
-
-  // --- Bloqueo de doble registro en menos de 2 minutos ---
-  const ahora = new Date();
-  const ahoraMs = ahora.getTime();
-  const DOS_MINUTOS_MS = 2 * 60 * 1000;
-
-  if (tipo === "entrada") {
-    // Busca el último registro de entrada
-    const registrosHoy = registros
-      .filter(r => r.id === id && r.entradaCompleta)
-      .sort((a, b) => new Date(b.entradaCompleta) - new Date(a.entradaCompleta));
-
-    if (registrosHoy.length > 0) {
-      const ultimoRegistro = registrosHoy[0];
-      const ultimaHora = new Date(ultimoRegistro.entradaCompleta);
-      if (ahoraMs - ultimaHora.getTime() < DOS_MINUTOS_MS) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Registro muy reciente',
-          text: `Ya existe un registro de entrada para este empleado en los últimos 20 minutos.`,
-          showConfirmButton: false,
-          timer: 20000
-        });
-        limpiarBusquedaEmpleado();
-        return;
-      }
-    }
-
-    const { value: confirmar } = await Swal.fire({
-      title: `¿Registrar entrada?`,
-      text: `¿Deseas registrar entrada para ${nombre} a las ${hora}?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Sí, registrar',
-      cancelButtonText: 'Cancelar'
-    });
-
-    if (!confirmar) return;
-
-    const nuevoRegistro = {
-      uid: generarUID(),
-      id,
-      nombre,
-      cargo,
-      area,
-      entradaCompleta: fechaHoraCompleta,
-      salidaCompleta: "",
-      comentario: "" // Asegura que todos los registros nuevos tengan campo comentario
-    };
-
-    registros.push(nuevoRegistro);
-
-    guardarLog(`Registro de entrada`, `${nombre} (ID ${id})`);
-  } else if (tipo === "salida") {
-    // Busca el último registro de entrada sin salida
-    const registroSinSalida = registros
-      .filter(r => r.id === id && r.entradaCompleta && !r.salidaCompleta)
-      .sort((a, b) => new Date(b.entradaCompleta) - new Date(a.entradaCompleta))[0];
-
-    if (!registroSinSalida) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Sin entrada previa',
-        text: 'No se encontró un registro de entrada sin salida para este empleado.',
-        showConfirmButton: false,
-        timer: 2000
-      });
-      limpiarBusquedaEmpleado();
-      return;
-    }
-
-    // Bloqueo de doble registro de salida en menos de 2 minutos
-    if (registroSinSalida.salidaCompleta) {
-      const ultimaSalida = new Date(registroSinSalida.salidaCompleta);
-      if (ahoraMs - ultimaSalida.getTime() < DOS_MINUTOS_MS) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Registro muy reciente',
-          text: `Ya existe un registro de salida para este empleado en los últimos 2 minutos.`,
-          showConfirmButton: false,
-          timer: 2000
-        });
-        limpiarBusquedaEmpleado();
-        return;
-      }
-    }
-
-    const { value: confirmar } = await Swal.fire({
-      title: `¿Registrar salida?`,
-      text: `¿Deseas registrar salida para ${nombre} a las ${hora}?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Sí, registrar',
-      cancelButtonText: 'Cancelar'
-    });
-
-    if (!confirmar) return;
-
-    registroSinSalida.salidaCompleta = fechaHoraCompleta;
-
-    guardarLog(`Registro de salida`, `${nombre} (ID ${id})`);
-  }
-
-  guardarEnLS(LS_REGISTROS, registros);
-  mostrarRegistros();
-  limpiarBusquedaEmpleado();
-}
-
-function registrarSalidaDesdeTabla(idEmpleado) {
-  const empleados = obtenerDeLS(LS_EMPLEADOS) || [];
-  const empleado = empleados.find(e => e.id === idEmpleado);
-  if (!empleado) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Empleado no encontrado.',
-      confirmButtonText: 'Cerrar'
-    });
-    return;
-  }
-  // Coloca el valor en el input de búsqueda para que la selección sea coherente
-  const busquedaInput = document.getElementById("busquedaEmpleado");
-  if (busquedaInput) {
-    busquedaInput.value = `${empleado.nombre} (${empleado.id})${empleado.cargo ? ' - ' + empleado.cargo : ''}`;
-  }
-  registrar('salida');
-}
-
-// --- Lógica de Registros y Filtrado ---
-
-function esRegistroVisible(reg, nombreFiltro, areaFiltro, desde, hasta) {
-  if (nombreFiltro && !reg.nombre.toLowerCase().includes(nombreFiltro)) return false;
-  if (areaFiltro && reg.area !== areaFiltro) return false;
-
-  if (desde && (!reg.entradaCompleta || reg.entradaCompleta < `${desde} 00:00`)) return false;
-  if (hasta && (!reg.entradaCompleta || reg.entradaCompleta > `${hasta} 23:59`)) return false;
-
-  return true;
-}
-
-function mostrarRegistros() {
-  const tabla = document.querySelector("#registrosTabla tbody");
-  tabla.innerHTML = "";
+/**
+ * Exporta los datos de la tabla de registros a un archivo CSV.
+ */
+function exportarCSV() {
   const registros = obtenerDeLS(LS_REGISTROS) || [];
+  const empleados = obtenerDeLS(LS_EMPLEADOS) || [];
 
-  let nombreFiltro = document.getElementById("filtroNombre").value.toLowerCase();
-  let areaFiltro = document.getElementById("filtroArea").value;
-  let desde = document.getElementById("filtroDesde").value;
-  let hasta = document.getElementById("filtroHasta").value;
-
-  // Si todos los filtros están vacíos, aplica filtro predeterminado: registros de las últimas 18 horas
-  if (!nombreFiltro && !areaFiltro && !desde && !hasta) {
-    const ahora = new Date();
-    const hace18Horas = new Date(ahora.getTime() - 18 * 60 * 60 * 1000);
-
-    let filtrados = registros.filter(reg => {
-      if (!reg.entradaCompleta) return false;
-      const entrada = new Date(reg.entradaCompleta.replace(" ", "T"));
-      return entrada >= hace18Horas && entrada <= ahora;
-    });
-
-    // Ordenar por entradaCompleta descendente
-    filtrados.sort((a, b) => new Date(b.entradaCompleta) - new Date(a.entradaCompleta));
-
-    if (filtrados.length === 0) {
-      tabla.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#888;">No hay registros para mostrar.</td></tr>`;
-      return;
-    }
-
-    filtrados.forEach(reg => {
-      let salidaContenido = reg.salidaCompleta
-        ? reg.salidaCompleta
-        : `<button onclick="registrarSalidaDesdeTabla('${reg.id}')" aria-label="Registrar salida" title="Registrar salida">Registrar Salida</button>`;
-
-      tabla.innerHTML += `
-        <tr data-uid="${reg.uid}">
-          <td>${reg.area}</td>
-          <td>${reg.nombre}</td>
-          <td>${reg.cargo || '-'}</td>
-          <td>${reg.entradaCompleta || '-'}</td>
-          <td>${salidaContenido}</td>
-          <td>
-            <button onclick="agregarComentarioRegistro('${reg.uid}')"
-              aria-label="Agregar comentario"
-              title="Agregar comentario"
-              class="btn-comentario-registro">
-              <svg width="28px" height="28px" viewBox="0 0 48 48" version="1" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 48 48">
-              <circle fill="#4CAF50" cx="24" cy="24" r="21"/>
-              <g fill="#ffffff">
-              <rect x="21" y="14" width="6" height="20"/>
-              <rect x="14" y="21" width="20" height="6"/>
-              </g>
-              </svg>
-            </button>
-            <button onclick="eliminarRegistroPorUID('${reg.uid}')"
-              aria-label="Eliminar registro"
-              title="Eliminar registro"
-              class="btn-eliminar-registro">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#fff" viewBox="0 0 32 32">
-                <path class="stone_een" d="M5,7h22c0.552,0,1-0.448,1-1V5c0-1.105-0.895-2-2-2h-7V2c0-0.552-0.448-1-1-1h-4c-0.552,0-1,0.448-1,1v1
-                  H6C4.895,3,4,3.895,4,5v1C4,6.552,4.448,7,5,7z M14,2h4v1h-4V2z M5.083,8l1.764,21.166C6.934,30.203,7.8,31,8.84,31H23.16
-                  c1.04,0,1.907-0.797,1.993-1.834L26.917,8H5.083z M12,26.5c0,0.276-0.224,0.5-0.5,0.5S11,26.776,11,26.5v-15
-                  c0-0.276,0.224-0.5,0.5-0.5s0.5,0.224,0.5,0.5V26.5z M15,26.5c0,0.276-0.224,0.5-0.5,0.5S14,26.776,14,26.5v-15
-                  c0-0.276,0.224-0.5,0.5-0.5s0.5,0.224,0.5,0.5V26.5z M18,26.5c0,0.276-0.224,0.5-0.5,0.5S17,26.776,17,26.5v-15
-                  c0-0.276,0.224-0.5,0.5-0.5s0.5,0.224,0.5,0.5V26.5z M21,26.5c0,0.276-0.224,0.5-0.5,0.5S20,26.776,20,26.5v-15
-                  c0-0.276,0.224-0.5,0.5-0.5s0.5,0.224,0.5,0.5V26.5z"/>
-              </svg>
-            </button>
-          </td>
-        </tr>`;
- // Aquí falta el cierre del botón de comentario y el div de los botones
-    });
-
-    aplicarEventosDblClickATabla();
-    return; // Salir para no aplicar el filtro general
-  }
-
-  // Filtro normal si hay algún filtro activo
-
-  let filtrados = registros.filter(reg => {
-    return (!nombreFiltro || reg.nombre.toLowerCase().includes(nombreFiltro))
-      && (!areaFiltro || reg.area === areaFiltro)
-      && (!desde || reg.entradaCompleta >= `${desde} 00:00`)
-      && (!hasta || reg.entradaCompleta <= `${hasta} 23:59`);
-  });
-
-  // Ordenar por entradaCompleta descendente
-
-  filtrados.sort((a, b) => new Date(b.entradaCompleta) - new Date(a.entradaCompleta));
-
-  if (filtrados.length === 0) {
-    tabla.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#888;">No hay registros para mostrar.</td></tr>`;
+  if (registros.length === 0) {
+    sweetAlertError('No hay registros para exportar.', 'info');
     return;
   }
 
-  filtrados.forEach(reg => {
-    let salidaContenido = reg.salidaCompleta
-      ? reg.salidaCompleta
-      : `<button onclick="registrarSalidaDesdeTabla('${reg.id}')" aria-label="Registrar salida" title="Registrar salida">Registrar Salida</button>`;
+  // Encabezados del CSV
+  let csvContent = "Area,Nombre,Cargo,Fecha,Hora Entrada,Hora Salida,Comentario\n";
 
-    tabla.innerHTML += `
-      <tr data-uid="${reg.uid}">
-        <td>${reg.area}</td>
-        <td>${reg.nombre}</td>
-        <td>${reg.cargo || '-'}</td>
-        <td>${reg.entradaCompleta || '-'}</td>
-        <td>${salidaContenido}</td>
-        <td>
-          <button onclick="agregarComentarioRegistro('${reg.uid}')"
-              aria-label="Agregar comentario"
-              title="Agregar comentario"
-              class="btn-comentario-registro">
-              <svg width="28px" height="28px" viewBox="0 0 48 48" version="1" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 48 48">
-              <circle fill="#4CAF50" cx="24" cy="24" r="21"/>
-              <g fill="#ffffff">
-              <rect x="21" y="14" width="6" height="20"/>
-              <rect x="14" y="21" width="20" height="6"/>
-              </g>
-              </svg>
-          <button onclick="eliminarRegistroPorUID('${reg.uid}')"
-            aria-label="Eliminar registro"
-            title="Eliminar registro"
-            class="btn-eliminar-registro">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#fff" viewBox="0 0 32 32">
-              <path class="stone_een" d="M5,7h22c0.552,0,1-0.448,1-1V5c0-1.105-0.895-2-2-2h-7V2c0-0.552-0.448-1-1-1h-4c-0.552,0-1,0.448-1,1v1
-                H6C4.895,3,4,3.895,4,5v1C4,6.552,4.448,7,5,7z M14,2h4v1h-4V2z M5.083,8l1.764,21.166C6.934,30.203,7.8,31,8.84,31H23.16
-                c1.04,0,1.907-0.797,1.993-1.834L26.917,8H5.083z M12,26.5c0,0.276-0.224,0.5-0.5,0.5S11,26.776,11,26.5v-15
-                c0-0.276,0.224-0.5,0.5-0.5s0.5,0.224,0.5,0.5V26.5z M15,26.5c0,0.276-0.224,0.5-0.5,0.5S14,26.776,14,26.5v-15
-                c0-0.276,0.224-0.5,0.5-0.5s0.5,0.224,0.5,0.5V26.5z M18,26.5c0,0.276-0.224,0.5-0.5,0.5S17,26.776,17,26.5v-15
-                c0-0.276,0.224-0.5,0.5-0.5s0.5,0.224,0.5,0.5V26.5z M21,26.5c0,0.276-0.224,0.5-0.5,0.5S20,26.776,20,26.5v-15
-                c0-0.276,0.224-0.5,0.5-0.5s0.5,0.224,0.5,0.5V26.5z"/>
-          </svg>
-        </button>
-      </td>
-    </tr>`;
-  });
+  registros.forEach(registro => {
+    const empleado = empleados.find(emp => emp.id === registro.empleadoId);
+    if (empleado) {
+      const area = empleado.area || '';
+      const nombre = empleado.nombre || '';
+      const cargo = empleado.cargo || '';
+      const fecha = registro.fecha || '';
+      const entrada = registro.entrada || '';
+      const salida = registro.salida || '';
+      const comentario = registro.comentario ? `"${registro.comentario.replace(/"/g, '""')}"` : ''; // Escapar comillas dobles
 
-  aplicarEventosDblClickATabla();
-}
-
-function aplicarEventosDblClickATabla() {
-  document.querySelectorAll("#registrosTabla tbody tr").forEach(tr => {
-    const tdEntrada = tr.children[3]; // Columna de EntradaCompleta (índice 3)
-    const tdSalida = tr.children[4];  // Columna de SalidaCompleta (índice 4)
-
-    // Clonar y reemplazar para eliminar listeners viejos eficazmente
-    const newTdEntrada = tdEntrada.cloneNode(true);
-    tdEntrada.parentNode.replaceChild(newTdEntrada, tdEntrada);
-    newTdEntrada.addEventListener("dblclick", (event) => handleDblClickRegistro(event, 'entradaCompleta'));
-
-    const newTdSalida = tdSalida.cloneNode(true);
-    tdSalida.parentNode.replaceChild(newTdSalida, tdSalida);
-    newTdSalida.addEventListener("dblclick", (event) => handleDblClickRegistro(event, 'salidaCompleta'));
-  });
-}
-
-// Modificación de handleDblClickRegistro para recibir el tipo de campo
-
-function handleDblClickRegistro(event, tipoCampo) {
-  const td = event.currentTarget;
-  const fila = td.closest("tr");
-  const uid = fila.getAttribute("data-uid");
-  let registros = obtenerDeLS(LS_REGISTROS) || [];
-  const registro = registros.find(r => r.uid === uid);
-  if (!registro) {
-    Swal.fire('Error', 'Registro no encontrado para edición.', 'error');
-    return;
-  }
-
-  registroEditando = registro;
-  campoEditando = tipoCampo; // 'entradaCompleta' o 'salidaCompleta'
-
-  const modal = document.getElementById("editarRegistroModal");
-  const modalTitulo = document.getElementById("modalTituloEdicion");
-  const campoFechaHoraWrapper = document.getElementById("campoFechaHoraWrapper");
-  const nuevaFechaHoraInput = document.getElementById("nuevaFechaHoraInput");
-  const btnAceptar = document.getElementById("btnAceptarEdicion");
-
-  // Resetear visibilidad y valores
-  campoFechaHoraWrapper.style.display = 'block';
-  nuevaFechaHoraInput.value = registro[tipoCampo] ? registro[tipoCampo].replace(" ", "T") : ""; // Pre-llenar con la fecha y hora actual
-  btnAceptar.disabled = true;
-
-  modalTitulo.textContent = `Editar ${tipoCampo === 'entradaCompleta' ? 'Entrada' : 'Salida'}`;
-  modal.style.display = "flex"; // Mostrar el modal de edición
-  // document.getElementById('editarRegistroModal').style.display = 'flex';
-}
-
-async function aceptarEdicion() {
-  const nuevaFechaHoraInput = document.getElementById("nuevaFechaHoraInput");
-  let registros = obtenerDeLS(LS_REGISTROS) || [];
-
-  const nuevaFechaHora = nuevaFechaHoraInput.value;
-  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(nuevaFechaHora)) {
-    Swal.fire({ icon: 'error', title: 'Formato Inválido', text: 'Debe ingresar fecha y hora en formato YYYY-MM-DDTHH:mm.' });
-    return;
-  }
-
-  const nuevaFechaHoraStr = nuevaFechaHora.replace("T", " ");
-  if (registroEditando[campoEditando] === nuevaFechaHoraStr) {
-    Swal.fire({ icon: 'info', title: 'Sin cambios', text: 'La fecha y hora ingresada es la misma que la actual.' });
-    cerrarModalEdicion();
-    return;
-  }
-
-   registroEditando[campoEditando] = nuevaFechaHoraStr;
-
-  const index = registros.findIndex(r => r.uid === registroEditando.uid);
-  if (index !== -1) {
-    registros[index] = registroEditando;
-  } else {
-    registros.push(registroEditando);
-  }
-  guardarEnLS(LS_REGISTROS, registros);
-  guardarLog(`Hora de ${campoEditando === 'entradaCompleta' ? 'entrada' : 'salida'} modificada`, `${registroEditando.nombre} (ID ${registroEditando.id}) - Nueva Fecha y Hora: ${nuevaFechaHoraStr}`);
-
-  Swal.fire({ icon: 'success', title: 'Actualizado', text: 'Registro actualizado correctamente.', showConfirmButton: false, timer: 1500 });
-  cerrarModalEdicion();
-  mostrarRegistros();
-}
-
-function cancelarEdicion() {
-  document.getElementById("editarRegistroModal").style.display = "none";
-}
-
-function cerrarModalEdicion() {
-  document.getElementById("editarRegistroModal").style.display = "none";
-}
-
-function habilitarAceptarEdicion() {
-  const input = document.getElementById("nuevaFechaHoraInput");
-  document.getElementById("btnAceptarEdicion").disabled = !input.value;
-}
-
-// --- Funciones de Registros (por UID) ---
-
-function eliminarRegistroPorUID(uid) {
-  let registros = obtenerDeLS(LS_REGISTROS) || [];
-  const registro = registros.find(r => r.uid === uid);
-  if (!registro) {
-    Swal.fire('Error', 'Registro no encontrado.', 'error');
-    return;
-  }
-  Swal.fire({
-    title: '¿Eliminar registro?',
-    text: `¿Seguro que deseas eliminar el registro de ${registro.nombre} (${registro.entradaCompleta || ''} ${registro.salidaCompleta || ''})?`,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Sí, eliminar',
-    cancelButtonText: 'Cancelar'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      registros = registros.filter(r => r.uid !== uid);
-      guardarEnLS(LS_REGISTROS, registros);
-      guardarLog('Registro eliminado', `${registro.nombre} (ID ${registro.id})`);
-      mostrarRegistros();
-      Swal.fire('Eliminado', 'El registro ha sido eliminado.', 'success');
+      csvContent += `${area},${nombre},${cargo},${fecha},${entrada},${salida},${comentario}\n`;
     }
   });
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'registros_control_horario.csv');
+  document.body.appendChild(link); // Necesario para Firefox
+  link.click();
+  document.body.removeChild(link); // Limpiar
+  sweetAlertError('Datos exportados a CSV.', 'success');
 }
 
-function toggleAdmin() {
-  const panel = document.getElementById("adminPanel");
-  if (panel.style.display === "block") {
-    panel.style.display = "none";
-  } else {
-    panel.style.display = "block";
-    cargarEmpleados();
-  }
-}
+// --- Event Listeners Globales y Inicialización ---
 
-function toggleDarkMode() {
-  document.body.classList.toggle('dark-mode');
-  localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-  // Cambia el icono del botón según el modo
-  const btn = document.getElementById('toggleDarkMode');
-  if (document.body.classList.contains('dark-mode')) {
-    btn.innerHTML = '<span class="icono-modo">☀️</span>';
-  } else {
-    btn.innerHTML = '<span class="icono-modo">🌙</span>';
-  }
-}
+// Event listener principal para el tbody de la tabla de registros,
+// usando delegación de eventos para las acciones de comentario y eliminar.
+document.querySelector("#registrosTabla tbody")?.addEventListener('click', (event) => {
+  const target = event.target;
+  // Solo reaccionar a clics en botones con la clase 'accion-registro'
+  if (target.classList.contains('accion-registro')) {
+    const action = target.dataset.action;
+    const uid = target.dataset.uid;
 
-// Al cargar registros, asegúrate de que cada uno tenga la propiedad comentario
-
-function agregarComentarioRegistro(uid) {
-  let registros = obtenerDeLS(LS_REGISTROS) || [];
-  const reg = registros.find(r => r.uid === uid);
-  if (!reg) return;
-
-  Swal.fire({
-    title: 'Agregar o editar comentario',
-    input: 'textarea',
-    inputLabel: 'Comentario',
-    inputPlaceholder: 'Escribe un comentario para este registro...',
-    inputValue: reg.comentario || "",
-    showCancelButton: true,
-    confirmButtonText: 'Guardar',
-    cancelButtonText: 'Cancelar'
-  }).then(result => {
-    if (result.isConfirmed) {
-      reg.comentario = result.value || "";
-      guardarEnLS(LS_REGISTROS, registros);
-      Swal.fire('Comentario guardado', '', 'success');
+    if (action === 'comentario') {
+      agregarComentarioRegistro(uid);
+    } else if (action === 'eliminar') {
+      eliminarRegistroPorUID(uid);
     }
-  });
-}
-// Habilitar scroll horizontal por arrastre en el contenedor de la tabla
+  }
+});
 
-function habilitarArrastreScrollHorizontal(idContenedor) {
-  const contenedor = document.getElementById(idContenedor);
-  let isDown = false;
-  let startX;
-  let scrollLeft;
+// Event listener para el doble clic en las celdas editables de la tabla
+document.querySelector("#registrosTabla tbody")?.addEventListener('dblclick', (event) => {
+  const td = event.target.closest('td.editable');
+  // Asegurarse de no activar en los botones dentro de la celda de acciones
+  if (td && !td.querySelector('button')) {
+    handleDblClickRegistro(td);
+  }
+});
 
-  contenedor.addEventListener('mousedown', (e) => {
-    isDown = true;
-    contenedor.classList.add('arrastrando');
-    startX = e.pageX - contenedor.offsetLeft;
-    scrollLeft = contenedor.scrollLeft;
-  });
-  contenedor.addEventListener('mouseleave', () => {
-    isDown = false;
-    contenedor.classList.remove('arrastrando');
-  });
-  contenedor.addEventListener('mouseup', () => {
-    isDown = false;
-    contenedor.classList.remove('arrastrando');
-  });
-  contenedor.addEventListener('mousemove', (e) => {
-    if (!isDown) return;
-    e.preventDefault();
-    const x = e.pageX - contenedor.offsetLeft;
-    const walk = (x - startX) * 1.5;
-    contenedor.scrollLeft = scrollLeft - walk;
-  });
-}
 
-// --- Inicialización al cargar el DOM ---
+// Event Listener que se ejecuta cuando el DOM está completamente cargado.
+document.addEventListener("DOMContentLoaded", () => {
+  // Configurar botones de navegación entre secciones
+  const controlHorarioBtn = document.getElementById('controlHorarioBtn');
+  const libroNovedadesBtn = document.getElementById('libroNovedadesBtn');
 
-document.addEventListener("DOMContentLoaded", function() {
-  const btn = document.querySelector('.collapsible-button');
-  const filtros = document.querySelector('.filters-content');
-  if (btn && filtros) {
-    btn.addEventListener('click', function() {
-      filtros.style.display = (filtros.style.display === 'block') ? 'none' : 'block';
+  // Asignar event listeners a los botones de navegación
+  libroNovedadesBtn?.addEventListener('click', showLibroNovedades);
+  controlHorarioBtn?.addEventListener('click', showControlHorario);
+
+  // Mostrar inicialmente la sección de control de horario
+  showControlHorario(); // Llama a la función de utils.js
+
+  // Inicialización de la pantalla del Control de Horario
+  mostrarRegistros(); // Carga y muestra los registros existentes al iniciar.
+  popularFiltroArea(); // Popula el filtro de área con los datos de los empleados.
+  cargarEmpleadosEnAdmin(); // Carga la lista de empleados en el panel de administración.
+
+  // Configurar la actualización de fecha y hora en la cabecera
+  const fechaHoraActualDiv = document.getElementById('fechaHoraActual');
+  if (fechaHoraActualDiv) {
+    function actualizarFechaHora() {
+      const ahora = new Date();
+      const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const fechaFormateada = ahora.toLocaleDateString('es-ES', opcionesFecha);
+      const horaFormateada = ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+      fechaHoraActualDiv.textContent = `${fechaFormateada}, ${horaFormateada}`;
+    }
+    actualizarFechaHora(); // Llamar una vez para mostrar al cargar
+    setInterval(actualizarFechaHora, 1000); // Actualizar cada segundo
+  }
+
+  // Collapsible para los filtros (Mostrar/Ocultar)
+  const collapsibleButton = document.querySelector('.collapsible-button');
+  const filtersContent = document.querySelector('.filters-content');
+
+  if (collapsibleButton && filtersContent) {
+    collapsibleButton.addEventListener('click', function() {
+      this.classList.toggle('active');
+      filtersContent.classList.toggle('f-content'); // Cambia la clase para expandir/colapsar
     });
   }
 
-    setInterval(actualizarFechaHora, 1000);
-    actualizarFechaHora();
-    cargarEmpleados();
-    mostrarRegistros();
+  // Configuración del Modo Oscuro
+  // Cargar preferencia de modo oscuro desde localStorage al inicio
+  if (localStorage.getItem('darkMode') === 'true') {
+    document.body.classList.add('dark-mode');
+  }
+  // Asignar event listener al botón de alternar modo oscuro
+  const darkBtn = document.getElementById('toggleDarkMode');
+  darkBtn?.addEventListener('click', toggleDarkMode);
 
-    // Configurar botones de navegación
+  // Asignar event listeners a otros elementos interactivos
+  document.getElementById('adminBtn')?.addEventListener('click', toggleAdmin);
+  document.getElementById('entradaBtn')?.addEventListener('click', () => registrar('entrada'));
+  document.getElementById('salidaBtn')?.addEventListener('click', () => registrar('salida'));
+  // Limpiar búsqueda de empleado si el campo se vacía
+  document.getElementById('busquedaEmpleado')?.addEventListener('search', function () {
+    if (this.value === '') limpiarBusquedaEmpleado();
+  });
+  document.getElementById('limpiarFiltrosBtn')?.addEventListener('click', limpiarFiltros);
+  document.getElementById('exportarCSVBtn')?.addEventListener('click', exportarCSV);
+  
+  // Inicializar el modal de edición para que pueda cerrarse haciendo clic fuera
+  habilitarCierrePorFondo('editarRegistroModal');
 
-    const controlHorarioBtn = document.getElementById('controlHorarioBtn');
-    const libroNovedadesBtn = document.getElementById('libroNovedadesBtn');
-    const controlHorarioSection = document.getElementById('controlHorarioSection');
-    const libroNovedadesSection = document.getElementById('libroNovedadesSection');
-
-    if (controlHorarioBtn && libroNovedadesBtn && controlHorarioSection && libroNovedadesSection) {
-        // Inicialmente mostrar la sección de Control Horario
-        controlHorarioSection.style.display = 'block';
-        libroNovedadesSection.style.display = 'none';
-
-        controlHorarioBtn.addEventListener('click', () => {
-        controlHorarioSection.style.display = 'block';
-        libroNovedadesSection.style.display = 'none';
-        });
-        libroNovedadesBtn.addEventListener('click', () => {
-        controlHorarioSection.style.display = 'none';
-        libroNovedadesSection.style.display = 'block';
-        });
+  // Event listener para la búsqueda de empleados
+  document.getElementById('busquedaEmpleado')?.addEventListener('input', buscarEmpleado);
+  // Event listener para cuando se selecciona un empleado de la datalist (o se pulsa Enter en el campo)
+  document.getElementById('busquedaEmpleado')?.addEventListener('change', function() {
+    if (this.value) { // Solo si hay un valor seleccionado/introducido
+      seleccionarEmpleado(this.value);
+    } else {
+      limpiarBusquedaEmpleado();
     }
+  });
 
-  habilitarArrastreScrollHorizontal('table-container'); 
+  // Inicializar un nuevo empleado al cargar la página en el panel admin,
+  // esto asegura que haya un ID pre-generado si el admin decide crear uno.
+  // Solo se genera si el panel de admin está visible, lo cual no ocurre al cargar la página por defecto.
+  // La llamada a nuevoEmpleado() se hará cuando el panel se abra.
 });
