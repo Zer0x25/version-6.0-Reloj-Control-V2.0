@@ -1,9 +1,23 @@
 /**
  * =================================================================
- * LIBRERÍA DE UTILIDADES
- * Este archivo contiene funciones de ayuda compartidas por toda la aplicación.
+ * LIBRERÍA DE UTILIDADES Y CONSTANTES GLOBALES
+ * Este archivo contiene funciones de ayuda y constantes compartidas.
  * =================================================================
  */
+
+// --- Constantes Globales de la Aplicación ---
+
+// Claves para Local Storage
+const LS_EMPLEADOS = "empleados";
+const LS_REGISTROS = "registros";
+const LS_LOGS = "logs";
+const LS_NOVEDADES = "libro-novedades-registros";
+const LS_PROVEEDORES = "libro-novedades-proveedores";
+const LS_TURNOS_CERRADOS = "libro-novedades-turnos-cerrados";
+const LS_TURNO_ABIERTO = "libro-novedades-turno-abierto";
+
+// Configuración de Seguridad
+const ADMIN_PIN = "1234";
 
 // --- Funciones de Fecha y Hora ---
 
@@ -30,12 +44,29 @@ function obtenerHoraActual() {
 
 /**
  * Genera un Identificador Único (UID) para los registros.
- * Este UID es una combinación de la marca de tiempo actual y un número aleatorio
- * para asegurar una alta probabilidad de unicidad.
  * @returns {string} Un UID alfanumérico único.
  */
 function generarUID() {
   return Date.now().toString(36) + Math.random().toString(36).substring(2, 15);
+}
+
+/**
+ * Genera un nuevo ID correlativo para un empleado.
+ * @returns {string} El nuevo ID correlativo formateado (e.g., "001").
+ */
+function generarIDCorrelativoEmpleado() {
+  const empleados = obtenerDeLS(LS_EMPLEADOS) || [];
+  let maxNum = 0;
+
+  empleados.forEach(empleado => {
+    const num = parseInt(empleado.id, 10);
+    if (!isNaN(num) && num > maxNum) {
+      maxNum = num;
+    }
+  });
+
+  const nextNum = maxNum + 1;
+  return String(nextNum).padStart(3, '0');
 }
 
 // --- Funciones de Almacenamiento Local (Local Storage) ---
@@ -43,7 +74,7 @@ function generarUID() {
 /**
  * Guarda un valor en Local Storage, convirtiéndolo a JSON.
  * @param {string} clave - La clave bajo la cual se guardará el dato.
- * @param {*} valor - El valor a guardar (puede ser un objeto, array, etc.).
+ * @param {*} valor - El valor a guardar.
  */
 function guardarEnLS(clave, valor) {
   try {
@@ -55,10 +86,9 @@ function guardarEnLS(clave, valor) {
 }
 
 /**
- * Obtiene un valor de Local Storage, convirtiéndolo de JSON.
- * Si la clave no existe o hay un error de parseo, devuelve null.
+ * Obtiene un valor de Local Storage.
  * @param {string} clave - La clave del dato a obtener.
- * @returns {*} El valor recuperado, o null si no se encuentra o hay un error.
+ * @returns {*} El valor recuperado, o null si no se encuentra.
  */
 function obtenerDeLS(clave) {
   try {
@@ -66,7 +96,6 @@ function obtenerDeLS(clave) {
     return valorGuardado ? JSON.parse(valorGuardado) : null;
   } catch (e) {
     console.error(`Error al obtener o parsear de Local Storage con la clave "${clave}":`, e);
-    // Podrías decidir mostrar un sweetAlertError aquí si el error es crítico para el usuario.
     return null;
   }
 }
@@ -87,10 +116,9 @@ function eliminarDeLS(clave) {
 // --- Funciones de Interfaz de Usuario (UI) ---
 
 /**
- * Muestra una alerta de error o advertencia utilizando SweetAlert2.
- * Esta es la forma preferida de mostrar mensajes al usuario.
+ * Muestra una alerta estilizada utilizando SweetAlert2.
  * @param {string} msg - El mensaje a mostrar.
- * @param {string} [type='warning'] - El tipo de icono ('success', 'error', 'warning', 'info', 'question').
+ * @param {string} [type='warning'] - El tipo de icono ('success', 'error', 'warning', 'info').
  * @param {string} [title='Atención'] - El título de la alerta.
  */
 function sweetAlertError(msg, type = 'warning', title = 'Atención') {
@@ -102,7 +130,6 @@ function sweetAlertError(msg, type = 'warning', title = 'Atención') {
       confirmButtonText: 'OK'
     });
   } else {
-    // Fallback si SweetAlert2 no está cargado (no debería ocurrir en producción)
     console.warn('SweetAlert2 no está disponible, usando alert() nativo:', msg);
     alert(`${title}: ${msg}`);
   }
@@ -110,19 +137,15 @@ function sweetAlertError(msg, type = 'warning', title = 'Atención') {
 
 /**
  * Alterna el modo oscuro/claro de la interfaz.
- * Guarda la preferencia en Local Storage.
  */
 function toggleDarkMode() {
   document.body.classList.toggle('dark-mode');
-  if (document.body.classList.contains('dark-mode')) {
-    guardarEnLS('darkMode', true);
-  } else {
-    guardarEnLS('darkMode', false);
-  }
-  // Actualizar el icono del sol/luna
+  const isDarkMode = document.body.classList.contains('dark-mode');
+  guardarEnLS('darkMode', isDarkMode);
+  
   const iconoModo = document.querySelector('.icono-modo');
   if (iconoModo) {
-    iconoModo.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+    iconoModo.textContent = isDarkMode ? '☀️' : '🌙';
   }
 }
 
@@ -136,22 +159,18 @@ function showControlHorario() {
 
 /**
  * Muestra la sección de Libro de Novedades y oculta el Control de Horario.
- * También inicializa el libro de novedades si la función existe.
  */
 function showLibroNovedades() {
   document.getElementById('controlHorarioSection')?.classList.add('hidden');
   document.getElementById('libroNovedadesSection')?.classList.remove('hidden');
 
-  // Asegurarse de que inicializarLibroNovedades esté definida antes de llamarla
-  // Esto previene errores si los scripts se cargan en un orden inesperado.
   if (typeof inicializarLibroNovedades === 'function') {
     inicializarLibroNovedades();
   }
 }
 
 /**
- * Muestra un modal y se asegura de que sea visible en la pantalla.
- * Añade la clase 'visible' para activar los estilos de visualización.
+ * Muestra un modal y se asegura de que sea visible.
  * @param {string} modalId - El ID del modal a mostrar.
  */
 function mostrarModalConScroll(modalId) {
@@ -160,17 +179,8 @@ function mostrarModalConScroll(modalId) {
     console.error(`Modal con ID "${modalId}" no encontrado.`);
     return;
   }
-
-  modal.classList.add('visible'); // Usa 'visible' para mostrar el modal
-
-  // Pequeño retardo para asegurar que el modal es visible antes de intentar scrollear
-  setTimeout(() => {
-    // Si el modal no está fijado en la pantalla, se desplaza a él para asegurar visibilidad.
-    // Esto es útil en dispositivos móviles o si el modal aparece fuera de la vista.
-    if (getComputedStyle(modal).position !== 'fixed') {
-      modal.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, 50);
+  modal.style.display = 'flex'; // Usar flex para centrar
+  modal.classList.add('visible');
 }
 
 /**
@@ -179,15 +189,43 @@ function mostrarModalConScroll(modalId) {
  */
 function habilitarCierrePorFondo(modalId) {
   const modal = document.getElementById(modalId);
-  if (!modal) {
-    console.error(`Modal con ID "${modalId}" no encontrado para habilitar cierre por fondo.`);
-    return;
-  }
+  if (!modal) return;
 
   modal.addEventListener('click', (event) => {
-    // Si el clic fue directamente en el fondo del modal (no en su contenido)
     if (event.target === modal) {
-      modal.classList.remove('visible'); // Oculta el modal
+      modal.style.display = 'none';
+      modal.classList.remove('visible');
     }
+  });
+}
+
+function habilitarArrastreScrollHorizontal(idContenedor) {
+  const contenedor = document.getElementById(idContenedor);
+  if (!contenedor) return;
+
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
+  contenedor.addEventListener('mousedown', (e) => {
+    isDown = true;
+    contenedor.classList.add('arrastrando');
+    startX = e.pageX - contenedor.offsetLeft;
+    scrollLeft = contenedor.scrollLeft;
+  });
+  contenedor.addEventListener('mouseleave', () => {
+    isDown = false;
+    contenedor.classList.remove('arrastrando');
+  });
+  contenedor.addEventListener('mouseup', () => {
+    isDown = false;
+    contenedor.classList.remove('arrastrando');
+  });
+  contenedor.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - contenedor.offsetLeft;
+    const walk = (x - startX) * 1.5; // Adjust scroll speed if needed
+    contenedor.scrollLeft = scrollLeft - walk;
   });
 }
